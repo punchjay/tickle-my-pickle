@@ -42,6 +42,11 @@ src/
     CourtList.tsx            # sidebar list of nearby courts
   index.css                  # global reset only (box-sizing, html/body height)
   App.css                    # intentionally empty — all styles are in styled-components
+  Tests/
+    App.test.tsx             # smoke test (renders without crashing)
+    LocationInput.test.tsx   # snapshot + interaction tests
+    CourtList.test.tsx       # snapshot tests (unselected and selected states)
+    __snapshots__/           # committed — update with: vitest -u
 ```
 
 ## Styling
@@ -55,6 +60,16 @@ Strict mode with `noUnusedLocals`, `noUnusedParameters`, and `erasableSyntaxOnly
 ## Google Maps
 
 Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`). Loads three libraries at startup: `maps`, `places`, `geocoding`. The legacy `google.maps.places.PlacesService.nearbySearch` API is used for court search; `google.maps.Marker` (legacy) is used for map pins.
+
+## Testing
+
+Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Three test files, three strategies:
+
+- **Smoke** (`App.test.tsx`) — confirms the root component mounts without crashing. No snapshot; `App` is too stateful and async to snapshot meaningfully.
+- **Snapshot** (`CourtList.test.tsx`) — renders with mock court data and serializes the DOM. Catches unintended markup or style changes. Update snapshots intentionally with `vitest -u`.
+- **Snapshot + interaction** (`LocationInput.test.tsx`) — one snapshot for the default render; interaction tests use `fireEvent` (not `userEvent` — not installed) to verify submit behavior, the 5-digit gate on the Search button, and the disabled state.
+
+`google.maps` types are globally available in tests via the `"google.maps"` entry in `src/Tests/tsconfig.json`. Mock court objects use `as unknown as Court[]` to satisfy the type without implementing the full `PlaceResult` shape. `Element.prototype.scrollIntoView` is mocked with `vi.fn()` in `CourtList.test.tsx` since jsdom doesn't implement it.
 
 ## Code style
 
