@@ -4,7 +4,12 @@ import LocationInput from '@/components/LocationInput'
 describe('LocationInput', () => {
   it('matches snapshot', () => {
     const { container } = render(
-      <LocationInput onZipSubmit={() => {}} onGeolocate={() => {}} loading={false} disabled={false} />,
+      <LocationInput
+        onZipSubmit={() => {}}
+        onGeolocate={() => {}}
+        loading={false}
+        disabled={false}
+      />,
     )
     expect(container).toMatchSnapshot()
   })
@@ -12,7 +17,12 @@ describe('LocationInput', () => {
   it('calls onZipSubmit with the entered zip on submit', () => {
     const onZipSubmit = vi.fn()
     render(
-      <LocationInput onZipSubmit={onZipSubmit} onGeolocate={() => {}} loading={false} disabled={false} />,
+      <LocationInput
+        onZipSubmit={onZipSubmit}
+        onGeolocate={() => {}}
+        loading={false}
+        disabled={false}
+      />,
     )
     fireEvent.change(screen.getByPlaceholderText('Enter zip code'), {
       target: { value: '90210' },
@@ -24,7 +34,12 @@ describe('LocationInput', () => {
   it('calls onGeolocate when the location button is clicked', () => {
     const onGeolocate = vi.fn()
     render(
-      <LocationInput onZipSubmit={() => {}} onGeolocate={onGeolocate} loading={false} disabled={false} />,
+      <LocationInput
+        onZipSubmit={() => {}}
+        onGeolocate={onGeolocate}
+        loading={false}
+        disabled={false}
+      />,
     )
     fireEvent.click(screen.getByRole('button', { name: 'Use my location' }))
     expect(onGeolocate).toHaveBeenCalled()
@@ -32,7 +47,12 @@ describe('LocationInput', () => {
 
   it('keeps Search disabled until 5 digits are entered', () => {
     render(
-      <LocationInput onZipSubmit={() => {}} onGeolocate={() => {}} loading={false} disabled={false} />,
+      <LocationInput
+        onZipSubmit={() => {}}
+        onGeolocate={() => {}}
+        loading={false}
+        disabled={false}
+      />,
     )
     const input = screen.getByPlaceholderText('Enter zip code')
     const searchBtn = screen.getByRole('button', { name: 'Search' })
@@ -46,9 +66,16 @@ describe('LocationInput', () => {
 
   it('disables all inputs when disabled prop is true', () => {
     render(
-      <LocationInput onZipSubmit={() => {}} onGeolocate={() => {}} loading={false} disabled={true} />,
+      <LocationInput
+        onZipSubmit={() => {}}
+        onGeolocate={() => {}}
+        loading={false}
+        disabled={true}
+      />,
     )
     expect(screen.getByPlaceholderText('Enter zip code')).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Use my location' })).toBeDisabled()
+    expect(
+      screen.getByRole('button', { name: 'Use my location' }),
+    ).toBeDisabled()
   })
 })

@@ -84,7 +84,12 @@ interface Props {
   disabled: boolean
 }
 
-export default function LocationInput({ onZipSubmit, onGeolocate, loading, disabled }: Props) {
+export default function LocationInput({
+  onZipSubmit,
+  onGeolocate,
+  loading,
+  disabled,
+}: Props) {
   const [zip, setZip] = useState('')
 
   function handleSubmit(e: FormEvent) {
@@ -106,11 +111,18 @@ export default function LocationInput({ onZipSubmit, onGeolocate, loading, disab
           disabled={disabled || loading}
           aria-label="Zip code"
         />
-        <SearchButton type="submit" disabled={disabled || loading || zip.length < 5}>
+        <SearchButton
+          type="submit"
+          disabled={disabled || loading || zip.length < 5}
+        >
           {loading ? 'Searching…' : 'Search'}
         </SearchButton>
       </SearchForm>
-      <GeoButton type="button" onClick={onGeolocate} disabled={disabled || loading}>
+      <GeoButton
+        type="button"
+        onClick={onGeolocate}
+        disabled={disabled || loading}
+      >
         Use my location
       </GeoButton>
     </Wrapper>

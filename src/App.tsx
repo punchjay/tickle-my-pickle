@@ -65,7 +65,11 @@ function App() {
 
     setOptions({ key: apiKey, v: 'weekly' })
 
-    Promise.all([importLibrary('maps'), importLibrary('places'), importLibrary('geocoding')])
+    Promise.all([
+      importLibrary('maps'),
+      importLibrary('places'),
+      importLibrary('geocoding'),
+    ])
       .then(() => {
         if (!mapDivRef.current) return
         const map = new google.maps.Map(mapDivRef.current, {
@@ -122,8 +126,12 @@ function App() {
               markersRef.current.push(marker)
               marker.addListener('click', () => setSelectedCourt(place))
             })
-          } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-            setError('No pickleball courts found nearby. Try a different location.')
+          } else if (
+            status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS
+          ) {
+            setError(
+              'No pickleball courts found nearby. Try a different location.',
+            )
           } else {
             setError('Search failed. Please try again.')
           }
@@ -160,7 +168,8 @@ function App() {
     setLoading(true)
     setError(null)
     navigator.geolocation.getCurrentPosition(
-      (pos) => searchNearby({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (pos) =>
+        searchNearby({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       () => {
         setLoading(false)
         setError('Location access denied. Enter a zip code instead.')
@@ -188,7 +197,11 @@ function App() {
         {error && <ErrorBanner>{error}</ErrorBanner>}
       </OverlayTop>
       {courts.length > 0 && (
-        <CourtList courts={courts} selectedCourt={selectedCourt} onSelect={handleCourtSelect} />
+        <CourtList
+          courts={courts}
+          selectedCourt={selectedCourt}
+          onSelect={handleCourtSelect}
+        />
       )}
     </AppWrapper>
   )

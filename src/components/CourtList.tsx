@@ -137,13 +137,17 @@ export default function CourtList({ courts, selectedCourt, onSelect }: Props) {
   useEffect(() => {
     if (!selectedCourt) return
     const idx = courts.indexOf(selectedCourt)
-    itemRefs.current[idx]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    itemRefs.current[idx]?.scrollIntoView({
+      block: 'nearest',
+      behavior: 'smooth',
+    })
   }, [selectedCourt, courts])
 
   return (
     <Sidebar>
       <Header>
-        {courts.length} pickleball {courts.length === 1 ? 'court' : 'courts'} nearby
+        {courts.length} pickleball {courts.length === 1 ? 'court' : 'courts'}{' '}
+        nearby
       </Header>
       <List>
         {courts.map((court, i) => {
@@ -171,7 +175,9 @@ export default function CourtList({ courts, selectedCourt, onSelect }: Props) {
                   </Rating>
                 )}
                 {court.opening_hours != null && (
-                  <Hours $isOpen={isOpen}>{isOpen ? 'Open now' : 'Closed'}</Hours>
+                  <Hours $isOpen={isOpen}>
+                    {isOpen ? 'Open now' : 'Closed'}
+                  </Hours>
                 )}
               </Info>
             </Item>

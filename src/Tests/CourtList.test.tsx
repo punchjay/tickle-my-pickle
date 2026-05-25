@@ -38,7 +38,11 @@ describe('CourtList', () => {
 
   it('matches snapshot with a selected court', () => {
     const { container } = render(
-      <CourtList courts={courts} selectedCourt={courts[1]} onSelect={() => {}} />,
+      <CourtList
+        courts={courts}
+        selectedCourt={courts[1]}
+        onSelect={() => {}}
+      />,
     )
     expect(container).toMatchSnapshot()
   })
