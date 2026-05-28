@@ -71,6 +71,10 @@ Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Three 
 
 `google.maps` types are globally available in tests via the `"google.maps"` entry in `src/Tests/tsconfig.json`. Mock court objects use `as unknown as Court[]` to satisfy the type without implementing the full `PlaceResult` shape. `Element.prototype.scrollIntoView` is mocked with `vi.fn()` in `CourtList.test.tsx` since jsdom doesn't implement it.
 
+## Claude API
+
+Default model for any Claude API integrations in this project: `claude-opus-4-8`.
+
 ## Code style
 
 Prettier config (`.prettierrc`): single quotes, no semicolons, trailing commas, 80-char print width, 2-space indent.
