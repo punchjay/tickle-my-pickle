@@ -1,0 +1,533 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CourtList > matches snapshot with a selected court 1`] = `
+.c0 {
+  position: absolute;
+  left: 16px;
+  top: 104px;
+  bottom: 16px;
+  z-index: 10;
+  width: 300px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.c1 {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  border-bottom: 1px solid #f3f4f6;
+  flex-shrink: 0;
+}
+
+.c2 {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.c3 {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  align-items: flex-start;
+  transition: background 0.1s;
+  background: transparent;
+}
+
+.c3:hover {
+  background: #f9fafb;
+}
+
+.c11 {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  align-items: flex-start;
+  transition: background 0.1s;
+  background: #f0fdf4;
+}
+
+.c11:hover {
+  background: #f0fdf4;
+}
+
+.c4 {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.c12 {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #15803d;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.c5 {
+  flex: 1;
+  min-width: 0;
+}
+
+.c6 {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c7 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c8 {
+  margin: 0 0 2px;
+  font-size: 12px;
+  color: #d97706;
+}
+
+.c9 {
+  color: #9ca3af;
+}
+
+.c10 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #16a34a;
+}
+
+.c13 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #ef4444;
+}
+
+@media (max-width: 640px) {
+  .c0 {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    max-height: 45svh;
+  }
+}
+
+<div>
+  <div
+    class="c0"
+  >
+    <h2
+      aria-live="polite"
+      class="c1"
+    >
+      3
+       pickleball 
+      courts
+       
+      nearby
+    </h2>
+    <ul
+      class="c2"
+    >
+      <li
+        class="c3"
+      >
+        <span
+          class="c4"
+        >
+          1
+        </span>
+        <div
+          class="c5"
+        >
+          <p
+            class="c6"
+          >
+            City Pickleball Club
+          </p>
+          <p
+            class="c7"
+          >
+            123 Main St, Springfield
+          </p>
+          <p
+            class="c8"
+          >
+            ★ 
+            4.5
+            <span
+              class="c9"
+            >
+               (
+              127
+              )
+            </span>
+          </p>
+          <p
+            class="c10"
+          >
+            Open now
+          </p>
+        </div>
+      </li>
+      <li
+        class="c11"
+      >
+        <span
+          class="c12"
+        >
+          2
+        </span>
+        <div
+          class="c5"
+        >
+          <p
+            class="c6"
+          >
+            Riverside Courts
+          </p>
+          <p
+            class="c7"
+          >
+            456 Oak Ave, Springfield
+          </p>
+          <p
+            class="c8"
+          >
+            ★ 
+            3.8
+            <span
+              class="c9"
+            >
+               (
+              42
+              )
+            </span>
+          </p>
+          <p
+            class="c13"
+          >
+            Closed
+          </p>
+        </div>
+      </li>
+      <li
+        class="c3"
+      >
+        <span
+          class="c4"
+        >
+          3
+        </span>
+        <div
+          class="c5"
+        >
+          <p
+            class="c6"
+          >
+            Community Rec Center
+          </p>
+          <p
+            class="c7"
+          >
+            789 Elm Blvd, Springfield
+          </p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+`;
+
+exports[`CourtList > matches snapshot with no selection 1`] = `
+.c0 {
+  position: absolute;
+  left: 16px;
+  top: 104px;
+  bottom: 16px;
+  z-index: 10;
+  width: 300px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.c1 {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  border-bottom: 1px solid #f3f4f6;
+  flex-shrink: 0;
+}
+
+.c2 {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.c3 {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  align-items: flex-start;
+  transition: background 0.1s;
+  background: transparent;
+}
+
+.c3:hover {
+  background: #f9fafb;
+}
+
+.c4 {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.c5 {
+  flex: 1;
+  min-width: 0;
+}
+
+.c6 {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c7 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c8 {
+  margin: 0 0 2px;
+  font-size: 12px;
+  color: #d97706;
+}
+
+.c9 {
+  color: #9ca3af;
+}
+
+.c10 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #16a34a;
+}
+
+.c11 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #ef4444;
+}
+
+@media (max-width: 640px) {
+  .c0 {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    max-height: 45svh;
+  }
+}
+
+<div>
+  <div
+    class="c0"
+  >
+    <h2
+      aria-live="polite"
+      class="c1"
+    >
+      3
+       pickleball 
+      courts
+       
+      nearby
+    </h2>
+    <ul
+      class="c2"
+    >
+      <li
+        class="c3"
+      >
+        <span
+          class="c4"
+        >
+          1
+        </span>
+        <div
+          class="c5"
+        >
+          <p
+            class="c6"
+          >
+            City Pickleball Club
+          </p>
+          <p
+            class="c7"
+          >
+            123 Main St, Springfield
+          </p>
+          <p
+            class="c8"
+          >
+            ★ 
+            4.5
+            <span
+              class="c9"
+            >
+               (
+              127
+              )
+            </span>
+          </p>
+          <p
+            class="c10"
+          >
+            Open now
+          </p>
+        </div>
+      </li>
+      <li
+        class="c3"
+      >
+        <span
+          class="c4"
+        >
+          2
+        </span>
+        <div
+          class="c5"
+        >
+          <p
+            class="c6"
+          >
+            Riverside Courts
+          </p>
+          <p
+            class="c7"
+          >
+            456 Oak Ave, Springfield
+          </p>
+          <p
+            class="c8"
+          >
+            ★ 
+            3.8
+            <span
+              class="c9"
+            >
+               (
+              42
+              )
+            </span>
+          </p>
+          <p
+            class="c11"
+          >
+            Closed
+          </p>
+        </div>
+      </li>
+      <li
+        class="c3"
+      >
+        <span
+          class="c4"
+        >
+          3
+        </span>
+        <div
+          class="c5"
+        >
+          <p
+            class="c6"
+          >
+            Community Rec Center
+          </p>
+          <p
+            class="c7"
+          >
+            789 Elm Blvd, Springfield
+          </p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+`;
