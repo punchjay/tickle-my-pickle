@@ -3,8 +3,6 @@ import LocationInput from './components/LocationInput'
 import CourtList from './components/CourtList'
 import { usePickleballMap } from './hooks/usePickleballMap'
 
-export type Court = google.maps.places.PlaceResult
-
 const AppWrapper = styled.div`
   position: relative;
   width: 100vw;
@@ -64,7 +62,11 @@ function App() {
           loading={loading}
           disabled={!mapsReady}
         />
-        {error && <ErrorBanner>{error}</ErrorBanner>}
+        {error && (
+          <ErrorBanner role="alert" aria-live="assertive">
+            {error}
+          </ErrorBanner>
+        )}
       </OverlayTop>
       {courts.length > 0 && (
         <CourtList

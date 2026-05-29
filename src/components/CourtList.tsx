@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import styled from 'styled-components'
-
-type Court = google.maps.places.PlaceResult
+import type { Court } from '../types'
 
 const Sidebar = styled.div`
   position: absolute;
@@ -145,17 +144,16 @@ export default function CourtList({ courts, selectedCourt, onSelect }: Props) {
 
   return (
     <Sidebar>
-      <Header>
+      <Header aria-live="polite">
         {courts.length} pickleball {courts.length === 1 ? 'court' : 'courts'}{' '}
         nearby
       </Header>
       <List>
         {courts.map((court, i) => {
           const selected = court === selectedCourt
-          const isOpen = court.opening_hours?.isOpen() ?? false
           return (
             <Item
-              key={court.place_id ?? i}
+              key={court.id ?? i}
               ref={(el) => {
                 itemRefs.current[i] = el
               }}
@@ -165,18 +163,18 @@ export default function CourtList({ courts, selectedCourt, onSelect }: Props) {
               <CourtNum $selected={selected}>{i + 1}</CourtNum>
               <Info>
                 <Name>{court.name}</Name>
-                <Address>{court.vicinity}</Address>
+                <Address>{court.address}</Address>
                 {court.rating != null && (
                   <Rating>
                     ★ {court.rating}
-                    {court.user_ratings_total != null && (
-                      <RatingCount> ({court.user_ratings_total})</RatingCount>
+                    {court.userRatingCount != null && (
+                      <RatingCount> ({court.userRatingCount})</RatingCount>
                     )}
                   </Rating>
                 )}
-                {court.opening_hours != null && (
-                  <Hours $isOpen={isOpen}>
-                    {isOpen ? 'Open now' : 'Closed'}
+                {court.isOpen != null && (
+                  <Hours $isOpen={court.isOpen}>
+                    {court.isOpen ? 'Open now' : 'Closed'}
                   </Hours>
                 )}
               </Info>

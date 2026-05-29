@@ -36,10 +36,14 @@ Requires `VITE_GOOGLE_MAPS_API_KEY` in `.env.local` (gitignored). See `.env.exam
 
 ```
 src/
-  App.tsx                    # root: map init, geocoding, Places search, state
+  App.tsx                    # root: composes map + overlay UI from the hook
+  types.ts                   # Court view-model (decoupled from google.maps types)
+  hooks/
+    usePickleballMap.ts      # map init, geocoding, Places search, marker state
   components/
     LocationInput.tsx        # zip input + geolocation button
     CourtList.tsx            # sidebar list of nearby courts
+    ErrorBoundary.tsx        # top-level fallback (wraps App in main.tsx)
   index.css                  # global reset only (box-sizing, html/body height)
   App.css                    # intentionally empty — all styles are in styled-components
   Tests/
@@ -48,6 +52,10 @@ src/
     CourtList.test.tsx       # snapshot tests (unselected and selected states)
     __snapshots__/           # committed — update with: vitest -u
 ```
+
+All map/search logic lives in `usePickleballMap.ts`; `App.tsx` is a thin
+composition layer. Components and tests depend on the `Court` interface in
+`types.ts`, not on the Google Maps SDK shape.
 
 ## Styling
 
@@ -59,7 +67,7 @@ Strict mode with `noUnusedLocals`, `noUnusedParameters`, and `erasableSyntaxOnly
 
 ## Google Maps
 
-Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`). Loads three libraries at startup: `maps`, `places`, `geocoding`. The legacy `google.maps.places.PlacesService.nearbySearch` API is used for court search; `google.maps.Marker` (legacy) is used for map pins.
+Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`). Loads four libraries at startup: `maps`, `places`, `geocoding`, `marker`. Court search uses the **new Places API** `google.maps.places.Place.searchByText` (text query "pickleball court" with a `locationBias`). Map pins use **`AdvancedMarkerElement`** with numbered `PinElement` glyphs (the map needs a `mapId` — `DEMO_MAP_ID` in dev). Google `Place` results are mapped into the local `Court` interface in the hook, so the rest of the app never touches the SDK shape.
 
 ## Testing
 
@@ -69,7 +77,11 @@ Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Three 
 - **Snapshot** (`CourtList.test.tsx`) — renders with mock court data and serializes the DOM. Catches unintended markup or style changes. Update snapshots intentionally with `vitest -u`.
 - **Snapshot + interaction** (`LocationInput.test.tsx`) — one snapshot for the default render; interaction tests use `fireEvent` (not `userEvent` — not installed) to verify submit behavior, the 5-digit gate on the Search button, and the disabled state.
 
-`google.maps` types are globally available in tests via the `"google.maps"` entry in `src/Tests/tsconfig.json`. Mock court objects use `as unknown as Court[]` to satisfy the type without implementing the full `PlaceResult` shape. `Element.prototype.scrollIntoView` is mocked with `vi.fn()` in `CourtList.test.tsx` since jsdom doesn't implement it.
+`google.maps` types are globally available in tests via the `"google.maps"` entry in `src/Tests/tsconfig.json`. Mock court objects are plain `Court[]` literals (the `Court` interface in `types.ts` is a small view-model, so no casting is needed). `Element.prototype.scrollIntoView` is mocked with `vi.fn()` in `CourtList.test.tsx` since jsdom doesn't implement it.
+
+## CI
+
+`.github/workflows/ci.yml` runs on every pull request and push to `main`: `lint`, `typecheck`, `test`, `build`. `.github/workflows/deploy.yml` deploys to GitHub Pages on push to `main`. Dependabot (`.github/dependabot.yml`) opens grouped weekly npm + actions update PRs.
 
 ## Claude API
 

@@ -18,6 +18,12 @@ cp .env.example .env.local
 # then edit .env.local and replace YOUR_KEY_HERE
 ```
 
+> **Restrict your key.** The key is bundled into the static client and is publicly
+> visible. In Google Cloud Console, add an **HTTP referrer restriction** (your
+> dev `localhost` and deployed Pages domain) and an **API restriction** limiting
+> it to Maps JavaScript, Places, and Geocoding only. This prevents others from
+> lifting it from the bundle and burning your quota.
+
 **3. Run it**
 
 ```bash

@@ -1,32 +1,35 @@
 import { render } from '@testing-library/react'
 import CourtList from '@/components/CourtList'
-import type { Court } from '@/App'
+import type { Court } from '@/types'
 
 Element.prototype.scrollIntoView = vi.fn()
 
-const courts = [
+const courts: Court[] = [
   {
-    place_id: 'place_1',
+    id: 'place_1',
     name: 'City Pickleball Club',
-    vicinity: '123 Main St, Springfield',
+    address: '123 Main St, Springfield',
     rating: 4.5,
-    user_ratings_total: 127,
-    opening_hours: { isOpen: () => true },
+    userRatingCount: 127,
+    isOpen: true,
+    location: { lat: 39.78, lng: -89.65 },
   },
   {
-    place_id: 'place_2',
+    id: 'place_2',
     name: 'Riverside Courts',
-    vicinity: '456 Oak Ave, Springfield',
+    address: '456 Oak Ave, Springfield',
     rating: 3.8,
-    user_ratings_total: 42,
-    opening_hours: { isOpen: () => false },
+    userRatingCount: 42,
+    isOpen: false,
+    location: { lat: 39.79, lng: -89.66 },
   },
   {
-    place_id: 'place_3',
+    id: 'place_3',
     name: 'Community Rec Center',
-    vicinity: '789 Elm Blvd, Springfield',
+    address: '789 Elm Blvd, Springfield',
+    location: { lat: 39.8, lng: -89.67 },
   },
-] as unknown as Court[]
+]
 
 describe('CourtList', () => {
   it('matches snapshot with no selection', () => {
