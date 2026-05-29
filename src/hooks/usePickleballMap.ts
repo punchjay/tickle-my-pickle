@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
-import type { Court } from '../App'
+import type { Court } from '../types'
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
+
+// Map ID required by AdvancedMarkerElement. DEMO_MAP_ID renders default styling
+// without Cloud-based map styling; swap for a real Map ID to customize.
+const MAP_ID = 'DEMO_MAP_ID'
+const SEARCH_RADIUS_METERS = 16093 // ~10 miles
 
 export function usePickleballMap() {
   const mapDivRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<google.maps.Map | null>(null)
-  const markersRef = useRef<google.maps.Marker[]>([])
-  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null)
+  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([])
 
   const [courts, setCourts] = useState<Court[]>([])
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null)
@@ -25,18 +29,22 @@ export function usePickleballMap() {
 
     setOptions({ key: apiKey, v: 'weekly' })
 
-    Promise.all([importLibrary('maps'), importLibrary('places'), importLibrary('geocoding')])
+    Promise.all([
+      importLibrary('maps'),
+      importLibrary('places'),
+      importLibrary('geocoding'),
+      importLibrary('marker'),
+    ])
       .then(() => {
         if (!mapDivRef.current) return
-        const map = new google.maps.Map(mapDivRef.current, {
+        mapRef.current = new google.maps.Map(mapDivRef.current, {
           center: { lat: 39.8283, lng: -98.5795 },
           zoom: 4,
+          mapId: MAP_ID,
           disableDefaultUI: true,
           zoomControl: true,
           gestureHandling: 'greedy',
         })
-        mapRef.current = map
-        placesServiceRef.current = new google.maps.places.PlacesService(map)
         setMapsReady(true)
       })
       .catch(() => {
@@ -45,52 +53,88 @@ export function usePickleballMap() {
   }, [])
 
   const clearMarkers = useCallback(() => {
-    markersRef.current.forEach((m) => m.setMap(null))
+    markersRef.current.forEach((m) => {
+      m.map = null
+    })
     markersRef.current = []
   }, [])
 
   const searchNearby = useCallback(
-    (location: google.maps.LatLngLiteral) => {
-      if (!mapRef.current || !placesServiceRef.current) return
+    async (location: google.maps.LatLngLiteral) => {
+      const map = mapRef.current
+      if (!map) return
       setLoading(true)
       setError(null)
       setCourts([])
       setSelectedCourt(null)
       clearMarkers()
-      mapRef.current.setCenter(location)
-      mapRef.current.setZoom(12)
+      map.setCenter(location)
+      map.setZoom(12)
 
-      placesServiceRef.current.nearbySearch(
-        { location, radius: 16093, keyword: 'pickleball' },
-        (results, status) => {
+      try {
+        const { Place } = google.maps.places
+        const { places } = await Place.searchByText({
+          textQuery: 'pickleball court',
+          fields: [
+            'id',
+            'displayName',
+            'formattedAddress',
+            'location',
+            'rating',
+            'userRatingCount',
+            'regularOpeningHours',
+          ],
+          locationBias: { center: location, radius: SEARCH_RADIUS_METERS },
+          maxResultCount: 20,
+        })
+
+        if (!places || places.length === 0) {
           setLoading(false)
-          if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-            setCourts(results)
-            results.forEach((place, i) => {
-              if (!place.geometry?.location || !mapRef.current) return
-              const marker = new google.maps.Marker({
-                map: mapRef.current,
-                position: place.geometry.location,
-                title: place.name,
-                label: {
-                  text: String(i + 1),
-                  color: 'white',
-                  fontWeight: '700',
-                  fontSize: '12px',
-                },
-              })
-              markersRef.current.push(marker)
-              marker.addListener('click', () => setSelectedCourt(place))
-            })
-          } else if (
-            status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS
-          ) {
-            setError('No pickleball courts found nearby. Try a different location.')
-          } else {
-            setError('Search failed. Please try again.')
-          }
-        },
-      )
+          setError('No pickleball courts found nearby. Try a different location.')
+          return
+        }
+
+        const results: Court[] = await Promise.all(
+          places.map(async (place) => ({
+            id: place.id,
+            name: place.displayName ?? 'Unknown court',
+            address: place.formattedAddress ?? '',
+            rating: place.rating ?? undefined,
+            userRatingCount: place.userRatingCount ?? undefined,
+            isOpen: place.regularOpeningHours
+              ? await place.isOpen()
+              : undefined,
+            location: {
+              lat: place.location?.lat() ?? location.lat,
+              lng: place.location?.lng() ?? location.lng,
+            },
+          })),
+        )
+
+        setCourts(results)
+        const { AdvancedMarkerElement, PinElement } = google.maps.marker
+        results.forEach((court, i) => {
+          const pin = new PinElement({
+            glyph: String(i + 1),
+            glyphColor: 'white',
+            background: '#16a34a',
+            borderColor: '#15803d',
+          })
+          const marker = new AdvancedMarkerElement({
+            map,
+            position: court.location,
+            title: court.name,
+            content: pin.element,
+            gmpClickable: true,
+          })
+          marker.addListener('click', () => setSelectedCourt(court))
+          markersRef.current.push(marker)
+        })
+      } catch {
+        setError('Search failed. Please try again.')
+      } finally {
+        setLoading(false)
+      }
     },
     [clearMarkers],
   )
@@ -128,18 +172,14 @@ export function usePickleballMap() {
         setLoading(false)
         setError('Location access denied. Enter a zip code instead.')
       },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
     )
   }, [mapsReady, searchNearby])
 
-  const handleCourtSelect = useCallback(
-    (court: Court) => {
-      setSelectedCourt(court)
-      if (court.geometry?.location && mapRef.current) {
-        mapRef.current.panTo(court.geometry.location)
-      }
-    },
-    [],
-  )
+  const handleCourtSelect = useCallback((court: Court) => {
+    setSelectedCourt(court)
+    mapRef.current?.panTo(court.location)
+  }, [])
 
   return {
     mapDivRef,
