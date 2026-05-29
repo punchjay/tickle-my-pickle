@@ -9,7 +9,6 @@ dist-ssr
 
 # testing
 /coverage
-src/Tests/__snapshots__/
 
 # vite cache
 /.vite

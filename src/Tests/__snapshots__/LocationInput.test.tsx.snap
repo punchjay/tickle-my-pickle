@@ -1,0 +1,113 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LocationInput > matches snapshot 1`] = `
+.c0 {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.c1 {
+  display: flex;
+  gap: 8px;
+}
+
+.c2 {
+  flex: 1;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.c2:focus {
+  border-color: #16a34a;
+}
+
+.c2:disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+}
+
+.c3 {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.c3:hover:not(:disabled) {
+  background: #15803d;
+}
+
+.c3:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+
+.c4 {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 9px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.c4:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+.c4:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+<div>
+  <div
+    class="c0"
+  >
+    <form
+      class="c1"
+    >
+      <input
+        aria-label="Zip code"
+        class="c2"
+        inputmode="numeric"
+        maxlength="5"
+        pattern="[0-9]{5}"
+        placeholder="Enter zip code"
+        type="text"
+        value=""
+      />
+      <button
+        class="c3"
+        disabled=""
+        type="submit"
+      >
+        Search
+      </button>
+    </form>
+    <button
+      class="c4"
+      type="button"
+    >
+      Use my location
+    </button>
+  </div>
+</div>
+`;

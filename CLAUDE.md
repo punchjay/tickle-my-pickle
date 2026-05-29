@@ -79,6 +79,8 @@ Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Three 
 
 `google.maps` types are globally available in tests via the `"google.maps"` entry in `src/Tests/tsconfig.json`. Mock court objects are plain `Court[]` literals (the `Court` interface in `types.ts` is a small view-model, so no casting is needed). `Element.prototype.scrollIntoView` is mocked with `vi.fn()` in `CourtList.test.tsx` since jsdom doesn't implement it.
 
+Snapshots **must be committed** (they are not gitignored) — CI runs with `vitest run`, which fails rather than writes missing snapshots. `src/setupTests.ts` registers the `jest-styled-components` serializer so snapshots show inlined CSS with stable `c0/c1` class names instead of runtime-generated `sc-*` IDs; this keeps them deterministic across machines and CI.
+
 ## CI
 
 `.github/workflows/ci.yml` runs on every pull request and push to `main`: `lint`, `typecheck`, `test`, `build`. `.github/workflows/deploy.yml` deploys to GitHub Pages on push to `main`. Dependabot (`.github/dependabot.yml`) opens grouped weekly npm + actions update PRs.
