@@ -83,6 +83,9 @@ export function usePickleballMap() {
             'rating',
             'userRatingCount',
             'regularOpeningHours',
+            // isOpen() needs utcOffsetMinutes; without it the SDK fires a
+            // secondary fetch that can throw and reject the whole search.
+            'utcOffsetMinutes',
           ],
           locationBias: { center: location, radius: SEARCH_RADIUS_METERS },
           maxResultCount: 20,
@@ -102,7 +105,7 @@ export function usePickleballMap() {
             rating: place.rating ?? undefined,
             userRatingCount: place.userRatingCount ?? undefined,
             isOpen: place.regularOpeningHours
-              ? await place.isOpen()
+              ? await place.isOpen().catch(() => undefined)
               : undefined,
             location: {
               lat: place.location?.lat() ?? location.lat,
@@ -130,7 +133,8 @@ export function usePickleballMap() {
           marker.addListener('click', () => setSelectedCourt(court))
           markersRef.current.push(marker)
         })
-      } catch {
+      } catch (err) {
+        console.error('Places searchByText failed:', err)
         setError('Search failed. Please try again.')
       } finally {
         setLoading(false)
