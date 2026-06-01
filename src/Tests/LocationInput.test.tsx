@@ -78,4 +78,53 @@ describe('LocationInput', () => {
       screen.getByRole('button', { name: 'Use my location' }),
     ).toBeDisabled()
   })
+
+  it('trims surrounding whitespace before submitting', () => {
+    const onZipSubmit = vi.fn()
+    render(
+      <LocationInput
+        onZipSubmit={onZipSubmit}
+        onGeolocate={() => {}}
+        loading={false}
+        disabled={false}
+      />,
+    )
+    const input = screen.getByPlaceholderText('Enter zip code')
+    fireEvent.change(input, { target: { value: ' 902 ' } })
+    // Submit the form directly so the trim logic is tested independently of
+    // the Search button's length-based disabled gate.
+    fireEvent.submit(input.closest('form')!)
+    expect(onZipSubmit).toHaveBeenCalledWith('902')
+  })
+
+  it('does not submit when the input is only whitespace', () => {
+    const onZipSubmit = vi.fn()
+    render(
+      <LocationInput
+        onZipSubmit={onZipSubmit}
+        onGeolocate={() => {}}
+        loading={false}
+        disabled={false}
+      />,
+    )
+    const input = screen.getByPlaceholderText('Enter zip code')
+    fireEvent.change(input, { target: { value: '     ' } })
+    fireEvent.submit(input.closest('form')!)
+    expect(onZipSubmit).not.toHaveBeenCalled()
+  })
+
+  it('caps the zip input length at 5 characters', () => {
+    render(
+      <LocationInput
+        onZipSubmit={() => {}}
+        onGeolocate={() => {}}
+        loading={false}
+        disabled={false}
+      />,
+    )
+    expect(screen.getByPlaceholderText('Enter zip code')).toHaveAttribute(
+      'maxLength',
+      '5',
+    )
+  })
 })
