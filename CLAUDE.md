@@ -7,9 +7,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev        # dev server (Vite, localhost:5173)
 npm run build      # type-check + production build → dist/
+npm run typecheck  # tsc over src/ and src/Tests/ (no emit)
 npm run lint       # ESLint on src/
 npm run format     # Prettier on src/
-npm run preview    # preview production build locally
+npm run preview    # preview production build locally (localhost:4173)
 npm test           # run all tests once (Vitest)
 npm run test:watch # watch mode
 ```
@@ -30,7 +31,7 @@ Pickleball court finder. User enters a zip code or uses browser geolocation; the
 
 ## Environment
 
-Requires `VITE_GOOGLE_MAPS_API_KEY` in `.env.local` (gitignored). See `.env.example`. The Google Cloud project needs **Maps JavaScript API**, **Places API**, and **Geocoding API** enabled.
+Requires `VITE_GOOGLE_MAPS_API_KEY` in `.env.local` (gitignored). See `.env.example`. The Google Cloud project needs **Maps JavaScript API**, **Places API (New)**, and **Geocoding API** enabled. The key is website-restricted; because GitHub Pages sends an origin-only referer, the prod referer pattern must be `https://punchjay.github.io/*` (an origin, not a subpath).
 
 ## Key files
 
@@ -50,6 +51,8 @@ src/
     App.test.tsx             # smoke test (renders without crashing)
     LocationInput.test.tsx   # snapshot + interaction tests
     CourtList.test.tsx       # snapshot tests (unselected and selected states)
+    App.styles.test.tsx      # per-styled-component render + snapshot tests
+    usePickleballMap.test.tsx # hook tests against a faked google.maps global
     __snapshots__/           # committed — update with: vitest -u
 ```
 
@@ -67,15 +70,17 @@ Strict mode with `noUnusedLocals`, `noUnusedParameters`, and `erasableSyntaxOnly
 
 ## Google Maps
 
-Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`). Loads four libraries at startup: `maps`, `places`, `geocoding`, `marker`. Court search uses the **new Places API** `google.maps.places.Place.searchByText` (text query "pickleball court" with a `locationBias`). Map pins use **`AdvancedMarkerElement`** with numbered `PinElement` glyphs (the map needs a `mapId` — `DEMO_MAP_ID` in dev). Google `Place` results are mapped into the local `Court` interface in the hook, so the rest of the app never touches the SDK shape.
+Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`). `setOptions` is called **once at module load** (not in the init effect) — StrictMode re-runs effects in dev and a second `setOptions` call warns. Loads four libraries at startup: `maps`, `places`, `geocoding`, `marker`. Court search uses the **new Places API** `google.maps.places.Place.searchByText` (text query "pickleball court" with a `locationBias`). Map pins use **`AdvancedMarkerElement`** (the map needs a `mapId` — `DEMO_MAP_ID` in dev) with numbered `PinElement` glyphs; use the **current**, non-deprecated API: `PinElement({ glyphText })`, pass the `PinElement` directly as `content` (not `pin.element`), and listen via `addEventListener('gmp-click', …)` (not `addListener('click', …)`). Google `Place` results are mapped into the local `Court` interface in the hook, so the rest of the app never touches the SDK shape.
 
 ## Testing
 
-Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Three test files, three strategies:
+Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Five test files:
 
 - **Smoke** (`App.test.tsx`) — confirms the root component mounts without crashing. No snapshot; `App` is too stateful and async to snapshot meaningfully.
 - **Snapshot** (`CourtList.test.tsx`) — renders with mock court data and serializes the DOM. Catches unintended markup or style changes. Update snapshots intentionally with `vitest -u`.
-- **Snapshot + interaction** (`LocationInput.test.tsx`) — one snapshot for the default render; interaction tests use `fireEvent` (not `userEvent` — not installed) to verify submit behavior, the 5-digit gate on the Search button, and the disabled state.
+- **Snapshot + interaction** (`LocationInput.test.tsx`) — one snapshot for the default render; interaction tests use `fireEvent` (not `userEvent` — not installed) to verify submit behavior, the 5-digit gate on the Search button, and the disabled state. The trim/guard tests dispatch `fireEvent.submit` on the form directly, since the input's numeric `pattern` blocks button-click submission for non-matching values.
+- **Styled-components** (`App.styles.test.tsx`) — renders each `App.styles.ts` export, asserts the element type, and snapshots the inlined CSS.
+- **Hook** (`usePickleballMap.test.tsx`) — drives the hook through a `Harness` component against a faked `google.maps` global (the fake `AdvancedMarkerElement` exposes `addEventListener`, matching the real HTMLElement). Captures the hook return in an effect (not during render) to satisfy `react-hooks` lint rules.
 
 `google.maps` types are globally available in tests via the `"google.maps"` entry in `src/Tests/tsconfig.json`. Mock court objects are plain `Court[]` literals (the `Court` interface in `types.ts` is a small view-model, so no casting is needed). `Element.prototype.scrollIntoView` is mocked with `vi.fn()` in `CourtList.test.tsx` since jsdom doesn't implement it.
 
@@ -83,7 +88,13 @@ Snapshots **must be committed** (they are not gitignored) — CI runs with `vite
 
 ## CI
 
-`.github/workflows/ci.yml` runs on every pull request and push to `main`: `lint`, `typecheck`, `test`, `build`. `.github/workflows/deploy.yml` deploys to GitHub Pages on push to `main`. Dependabot (`.github/dependabot.yml`) opens grouped weekly npm + actions update PRs.
+`.github/workflows/ci.yml` (named **CI**) runs on every pull request and push to `main`: `lint`, `typecheck`, `test`, `build`. `main` is **branch-protected** — the `verify` check must pass before merge (`enforce_admins: false`, so admins can still bypass).
+
+`.github/workflows/deploy.yml` deploys to GitHub Pages **only after CI succeeds** — it triggers via `workflow_run` on the CI workflow completing on `main` and runs only when the conclusion is `success` (plus a manual `workflow_dispatch` escape hatch). It builds with the `VITE_GOOGLE_MAPS_API_KEY` secret and publishes `dist/`.
+
+`.github/workflows/release-please.yml` automates releases: it opens/updates a release PR aggregating Conventional Commits on `main`; merging that PR cuts the tag + GitHub release and bumps `package.json`/`CHANGELOG.md`. Config in `release-please-config.json` + `.release-please-manifest.json`. Note: release-please's own PRs are created by `GITHUB_TOKEN`, so CI does **not** run on them and the required `verify` check never reports — merge them with `gh pr merge <num> --squash --admin`.
+
+Dependabot (`.github/dependabot.yml`) opens grouped weekly npm + actions update PRs.
 
 ## Claude API
 
