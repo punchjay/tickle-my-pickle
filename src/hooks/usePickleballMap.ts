@@ -9,6 +9,12 @@ const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
 const MAP_ID = 'DEMO_MAP_ID'
 const SEARCH_RADIUS_METERS = 16093 // ~10 miles
 
+// Configure the loader once at module load. Calling setOptions() more than
+// once warns, and StrictMode re-runs the init effect in dev.
+if (apiKey && apiKey !== 'YOUR_KEY_HERE') {
+  setOptions({ key: apiKey, v: 'weekly' })
+}
+
 export function usePickleballMap() {
   const mapDivRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<google.maps.Map | null>(null)
@@ -26,8 +32,6 @@ export function usePickleballMap() {
 
   useEffect(() => {
     if (!apiKey || apiKey === 'YOUR_KEY_HERE') return
-
-    setOptions({ key: apiKey, v: 'weekly' })
 
     Promise.all([
       importLibrary('maps'),
@@ -118,7 +122,7 @@ export function usePickleballMap() {
         const { AdvancedMarkerElement, PinElement } = google.maps.marker
         results.forEach((court, i) => {
           const pin = new PinElement({
-            glyph: String(i + 1),
+            glyphText: String(i + 1),
             glyphColor: 'white',
             background: '#16a34a',
             borderColor: '#15803d',
@@ -127,10 +131,10 @@ export function usePickleballMap() {
             map,
             position: court.location,
             title: court.name,
-            content: pin.element,
+            content: pin,
             gmpClickable: true,
           })
-          marker.addListener('click', () => setSelectedCourt(court))
+          marker.addEventListener('gmp-click', () => setSelectedCourt(court))
           markersRef.current.push(marker)
         })
       } catch (err) {
