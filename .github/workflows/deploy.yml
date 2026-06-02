@@ -1,7 +1,10 @@
 name: Deploy to GitHub Pages
 
+# Deploy only after CI (lint + typecheck + test + build) succeeds on main.
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -17,8 +20,13 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # workflow_run fires on any CI completion; gate on success.
+    # workflow_dispatch (manual) always runs.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
       - uses: actions/setup-node@v6
         with:
           node-version: 20
