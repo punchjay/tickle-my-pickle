@@ -45,7 +45,7 @@ src/
     CourtList.tsx            # sidebar list of nearby courts
     ErrorBoundary.tsx        # top-level fallback (wraps App in main.tsx)
   index.css                  # global reset only (box-sizing, html/body height)
-  App.css                    # intentionally empty — all styles are in styled-components
+  App.styles.ts              # styled-components for App.tsx
   Tests/
     App.test.tsx             # smoke test (renders without crashing)
     LocationInput.test.tsx   # snapshot + interaction tests
@@ -59,7 +59,7 @@ composition layer. Components and tests depend on the `Court` interface in
 
 ## Styling
 
-All component styles use **styled-components** (no CSS modules, no utility classes). Conditional styles use transient props (`$propName`) to avoid leaking custom props to the DOM. `App.css` is kept as an empty file; do not add CSS there.
+All component styles use **styled-components** (no CSS modules, no utility classes). Conditional styles use transient props (`$propName`) to avoid leaking custom props to the DOM. The only global CSS is `index.css` (reset only); per-component styles live alongside their component, and `App.tsx`'s styles are in `App.styles.ts`.
 
 ## TypeScript
 
