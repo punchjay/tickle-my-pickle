@@ -55,7 +55,9 @@ class FakeGeocoder {
 }
 class FakeAdvancedMarker {
   map: unknown
-  addListener = vi.fn()
+  // Real AdvancedMarkerElement extends HTMLElement; the hook listens via
+  // addEventListener('gmp-click', ...).
+  addEventListener = vi.fn()
   constructor(opts: { map: unknown }) {
     this.map = opts.map
   }
