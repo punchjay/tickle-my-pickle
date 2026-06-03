@@ -117,7 +117,7 @@ async function renderReady() {
 }
 
 async function runSearch(zip = '90210') {
-  act(() => hookApi.handleZipSubmit(zip))
+  act(() => hookApi.handleSearch(zip))
   await waitFor(() => expect(hookApi.loading).toBe(false))
 }
 
@@ -187,12 +187,12 @@ describe('usePickleballMap', () => {
     expect(hookApi.error).toBe('Search failed. Please try again.')
   })
 
-  it('reports when the zip cannot be geocoded', async () => {
+  it('reports when the location cannot be geocoded', async () => {
     geocodeImpl = (_req, cb) => cb(null, 'ZERO_RESULTS')
     await renderReady()
-    await runSearch('00000')
+    await runSearch('nowhere')
 
     expect(hookApi.courts).toHaveLength(0)
-    expect(hookApi.error).toMatch(/could not find that zip/i)
+    expect(hookApi.error).toMatch(/could not find that location/i)
   })
 })

@@ -10,8 +10,14 @@ import {
 } from '@/App.styles'
 
 describe('App.styles', () => {
-  it('AppWrapper renders a div and matches snapshot', () => {
-    const { container } = render(<AppWrapper />)
+  it('AppWrapper renders a div with the striped backdrop before the map loads', () => {
+    const { container } = render(<AppWrapper $mapVisible={false} />)
+    expect(container.firstChild?.nodeName).toBe('DIV')
+    expect(container.firstChild).toMatchSnapshot()
+  })
+
+  it('AppWrapper drops the backdrop once the map is visible', () => {
+    const { container } = render(<AppWrapper $mapVisible={true} />)
     expect(container.firstChild?.nodeName).toBe('DIV')
     expect(container.firstChild).toMatchSnapshot()
   })

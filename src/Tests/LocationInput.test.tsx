@@ -1,11 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import LocationInput from '@/components/LocationInput'
 
+const PLACEHOLDER = 'Search city, ZIP, or neighborhood'
+
 describe('LocationInput', () => {
   it('matches snapshot', () => {
     const { container } = render(
       <LocationInput
-        onZipSubmit={() => {}}
+        onSearch={() => {}}
         onGeolocate={() => {}}
         loading={false}
         disabled={false}
@@ -14,117 +16,94 @@ describe('LocationInput', () => {
     expect(container).toMatchSnapshot()
   })
 
-  it('calls onZipSubmit with the entered zip on submit', () => {
-    const onZipSubmit = vi.fn()
+  it('calls onSearch with the entered query on submit', () => {
+    const onSearch = vi.fn()
     render(
       <LocationInput
-        onZipSubmit={onZipSubmit}
+        onSearch={onSearch}
         onGeolocate={() => {}}
         loading={false}
         disabled={false}
       />,
     )
-    fireEvent.change(screen.getByPlaceholderText('Enter zip code'), {
-      target: { value: '90210' },
+    fireEvent.change(screen.getByPlaceholderText(PLACEHOLDER), {
+      target: { value: 'Seattle' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Search' }))
-    expect(onZipSubmit).toHaveBeenCalledWith('90210')
+    expect(onSearch).toHaveBeenCalledWith('Seattle')
   })
 
-  it('calls onGeolocate when the location button is clicked', () => {
+  it('calls onGeolocate when the "Near me" button is clicked', () => {
     const onGeolocate = vi.fn()
     render(
       <LocationInput
-        onZipSubmit={() => {}}
+        onSearch={() => {}}
         onGeolocate={onGeolocate}
         loading={false}
         disabled={false}
       />,
     )
-    fireEvent.click(screen.getByRole('button', { name: 'Use my location' }))
+    fireEvent.click(screen.getByRole('button', { name: /near me/i }))
     expect(onGeolocate).toHaveBeenCalled()
   })
 
-  it('keeps Search disabled until 5 digits are entered', () => {
+  it('disables the input and actions when disabled prop is true', () => {
     render(
       <LocationInput
-        onZipSubmit={() => {}}
-        onGeolocate={() => {}}
-        loading={false}
-        disabled={false}
-      />,
-    )
-    const input = screen.getByPlaceholderText('Enter zip code')
-    const searchBtn = screen.getByRole('button', { name: 'Search' })
-
-    expect(searchBtn).toBeDisabled()
-    fireEvent.change(input, { target: { value: '9021' } })
-    expect(searchBtn).toBeDisabled()
-    fireEvent.change(input, { target: { value: '90210' } })
-    expect(searchBtn).not.toBeDisabled()
-  })
-
-  it('disables all inputs when disabled prop is true', () => {
-    render(
-      <LocationInput
-        onZipSubmit={() => {}}
+        onSearch={() => {}}
         onGeolocate={() => {}}
         loading={false}
         disabled={true}
       />,
     )
-    expect(screen.getByPlaceholderText('Enter zip code')).toBeDisabled()
-    expect(
-      screen.getByRole('button', { name: 'Use my location' }),
-    ).toBeDisabled()
+    expect(screen.getByPlaceholderText(PLACEHOLDER)).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Search' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /near me/i })).toBeDisabled()
+  })
+
+  it('shows a loading state and disables actions while loading', () => {
+    render(
+      <LocationInput
+        onSearch={() => {}}
+        onGeolocate={() => {}}
+        loading={true}
+        disabled={false}
+      />,
+    )
+    expect(screen.getByPlaceholderText(PLACEHOLDER)).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Search' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /near me/i })).toBeDisabled()
   })
 
   it('trims surrounding whitespace before submitting', () => {
-    const onZipSubmit = vi.fn()
+    const onSearch = vi.fn()
     render(
       <LocationInput
-        onZipSubmit={onZipSubmit}
+        onSearch={onSearch}
         onGeolocate={() => {}}
         loading={false}
         disabled={false}
       />,
     )
-    const input = screen.getByPlaceholderText('Enter zip code')
-    fireEvent.change(input, { target: { value: ' 902 ' } })
-    // Submit the form directly so the trim logic is tested independently of
-    // the Search button's length-based disabled gate.
+    const input = screen.getByPlaceholderText(PLACEHOLDER)
+    fireEvent.change(input, { target: { value: '  Green Lake  ' } })
     fireEvent.submit(input.closest('form')!)
-    expect(onZipSubmit).toHaveBeenCalledWith('902')
+    expect(onSearch).toHaveBeenCalledWith('Green Lake')
   })
 
   it('does not submit when the input is only whitespace', () => {
-    const onZipSubmit = vi.fn()
+    const onSearch = vi.fn()
     render(
       <LocationInput
-        onZipSubmit={onZipSubmit}
+        onSearch={onSearch}
         onGeolocate={() => {}}
         loading={false}
         disabled={false}
       />,
     )
-    const input = screen.getByPlaceholderText('Enter zip code')
+    const input = screen.getByPlaceholderText(PLACEHOLDER)
     fireEvent.change(input, { target: { value: '     ' } })
     fireEvent.submit(input.closest('form')!)
-    expect(onZipSubmit).not.toHaveBeenCalled()
-  })
-
-  it('caps the zip input length at 5 characters', () => {
-    render(
-      <LocationInput
-        onZipSubmit={() => {}}
-        onGeolocate={() => {}}
-        loading={false}
-        disabled={false}
-      />,
-    )
-    expect(screen.getByPlaceholderText('Enter zip code')).toHaveAttribute(
-      'maxLength',
-      '5',
-    )
+    expect(onSearch).not.toHaveBeenCalled()
   })
 })

@@ -1,11 +1,26 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`App.styles > AppWrapper renders a div and matches snapshot 1`] = `
+exports[`App.styles > AppWrapper drops the backdrop once the map is visible 1`] = `
 .c0 {
   position: relative;
   width: 100vw;
   height: 100svh;
   overflow: hidden;
+  background: var(--pf-bg);
+}
+
+<div
+  class="c0"
+/>
+`;
+
+exports[`App.styles > AppWrapper renders a div with the striped backdrop before the map loads 1`] = `
+.c0 {
+  position: relative;
+  width: 100vw;
+  height: 100svh;
+  overflow: hidden;
+  background: linear-gradient(           rgba(239, 231, 211, 0.1),           rgba(239, 231, 211, 0.1)         ),repeating-linear-gradient(           110deg,           var(--pf-marigold) 0 36px,           var(--pf-tomato) 36px 72px,           var(--pf-court-blue) 72px 108px,           var(--pf-midnight) 108px 144px,           var(--pf-ivory) 144px 180px         );
 }
 
 <div

@@ -1,10 +1,28 @@
 import styled from 'styled-components'
 
-export const AppWrapper = styled.div`
+export const AppWrapper = styled.div<{ $mapVisible: boolean }>`
   position: relative;
   width: 100vw;
   height: 100svh;
   overflow: hidden;
+  /* Mood board "diagonal sunbeam stripes" shown before the map loads, under a
+     translucent ivory wash for a low-contrast texture. Dropped once the map is
+     visible (it covers this anyway). */
+  background: ${({ $mapVisible }) =>
+    $mapVisible
+      ? 'var(--pf-bg)'
+      : `linear-gradient(
+          rgba(239, 231, 211, 0.1),
+          rgba(239, 231, 211, 0.1)
+        ),
+        repeating-linear-gradient(
+          110deg,
+          var(--pf-marigold) 0 36px,
+          var(--pf-tomato) 36px 72px,
+          var(--pf-court-blue) 72px 108px,
+          var(--pf-midnight) 108px 144px,
+          var(--pf-ivory) 144px 180px
+        )`};
 `
 
 export const MapDiv = styled.div<{ $visible: boolean }>`
