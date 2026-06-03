@@ -1,7 +1,15 @@
 import LocationInput from './components/LocationInput'
 import CourtList from './components/CourtList'
 import { usePickleballMap } from './hooks/usePickleballMap'
-import { AppWrapper, MapDiv, OverlayTop, ErrorBanner } from './App.styles'
+import {
+  AppWrapper,
+  MapDiv,
+  OverlayTop,
+  HeaderCard,
+  Wordmark,
+  Tagline,
+  ErrorBanner,
+} from './App.styles'
 
 function App() {
   const {
@@ -18,8 +26,12 @@ function App() {
 
   return (
     <AppWrapper>
-      <MapDiv ref={mapDivRef} />
+      <MapDiv ref={mapDivRef} $visible={courts.length > 0} />
       <OverlayTop>
+        <HeaderCard>
+          <Wordmark>Tickle My Pickle</Wordmark>
+          <Tagline>Find pickleball courts near you</Tagline>
+        </HeaderCard>
         <LocationInput
           onZipSubmit={handleZipSubmit}
           onGeolocate={handleGeolocate}

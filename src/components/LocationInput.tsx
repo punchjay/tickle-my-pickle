@@ -62,8 +62,8 @@ const SearchButton = styled.button`
 
 const GeoButton = styled.button`
   width: 100%;
-  background: var(--pf-ivory);
-  color: var(--pf-link);
+  background: var(--pf-link);
+  color: var(--pf-ivory);
   border: 1.5px solid var(--pf-link);
   border-radius: var(--pf-radius-sm);
   padding: 9px;
@@ -74,7 +74,8 @@ const GeoButton = styled.button`
   transition: background 0.15s;
 
   &:hover:not(:disabled) {
-    background: var(--pf-surface);
+    background: var(--pf-midnight);
+    border-color: var(--pf-midnight);
   }
 
   &:disabled {

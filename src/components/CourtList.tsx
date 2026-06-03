@@ -5,7 +5,7 @@ import type { Court } from '../types'
 const Sidebar = styled.div`
   position: absolute;
   left: 16px;
-  top: 104px;
+  top: 184px;
   bottom: 16px;
   z-index: 10;
   width: 300px;
