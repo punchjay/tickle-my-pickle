@@ -7,6 +7,7 @@ Find pickleball courts near you. Enter a zip code or use your device's location 
 **1. Get a Google Maps API key**
 
 Create a project in [Google Cloud Console](https://console.cloud.google.com) and enable:
+
 - Maps JavaScript API
 - Places API
 - Geocoding API
