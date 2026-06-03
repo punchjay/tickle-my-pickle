@@ -4,7 +4,7 @@ Find pickleball courts near you. Enter a zip code or use your device's location 
 
 ## Setup
 
-**1. Get a Google Maps API key**
+### 1. Get a Google Maps API key
 
 Create a project in [Google Cloud Console](https://console.cloud.google.com) and enable:
 
@@ -12,7 +12,7 @@ Create a project in [Google Cloud Console](https://console.cloud.google.com) and
 - Places API
 - Geocoding API
 
-**2. Add your key**
+### 2. Add your key
 
 ```bash
 cp .env.example .env.local
@@ -25,7 +25,7 @@ cp .env.example .env.local
 > it to Maps JavaScript, Places, and Geocoding only. This prevents others from
 > lifting it from the bundle and burning your quota.
 
-**3. Run it**
+### 3. Run it
 
 ```bash
 npm install
