@@ -9,9 +9,10 @@ const Sidebar = styled.div`
   bottom: 16px;
   z-index: 10;
   width: 300px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border-soft);
+  border-radius: var(--pf-radius-md);
+  box-shadow: 0 2px 12px rgba(30, 45, 73, 0.18);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -30,10 +31,12 @@ const Sidebar = styled.div`
 const Header = styled.h2`
   margin: 0;
   padding: 12px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #6b7280;
-  border-bottom: 1px solid #f3f4f6;
+  font-family: var(--pf-font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  font-weight: 400;
+  color: var(--pf-text);
+  border-bottom: 1px solid var(--pf-border-soft);
   flex-shrink: 0;
 `
 
@@ -53,14 +56,16 @@ const Item = styled.li<ItemProps>`
   display: flex;
   gap: 12px;
   padding: 12px 16px;
-  border-bottom: 1px solid #f3f4f6;
   cursor: pointer;
   align-items: flex-start;
   transition: background 0.1s;
-  background: ${({ $selected }) => ($selected ? '#f0fdf4' : 'transparent')};
+  border-bottom: 1px solid var(--pf-border-soft);
+  background: ${({ $selected }) =>
+    $selected ? 'var(--pf-ivory)' : 'transparent'};
 
   &:hover {
-    background: ${({ $selected }) => ($selected ? '#f0fdf4' : '#f9fafb')};
+    background: ${({ $selected }) =>
+      $selected ? 'var(--pf-ivory)' : 'var(--pf-surface)'};
   }
 `
 
@@ -69,8 +74,9 @@ const CourtNum = styled.span<ItemProps>`
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: ${({ $selected }) => ($selected ? '#15803d' : '#16a34a')};
-  color: #fff;
+  background: ${({ $selected }) =>
+    $selected ? 'var(--pf-primary-hover)' : 'var(--pf-primary)'};
+  color: var(--pf-card);
   font-size: 11px;
   font-weight: 700;
   display: flex;
@@ -87,8 +93,8 @@ const Info = styled.div`
 const Name = styled.p`
   margin: 0 0 2px;
   font-size: 14px;
-  font-weight: 600;
-  color: #111827;
+  font-weight: 700;
+  color: var(--pf-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -97,7 +103,7 @@ const Name = styled.p`
 const Address = styled.p`
   margin: 0 0 4px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--pf-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -106,11 +112,11 @@ const Address = styled.p`
 const Rating = styled.p`
   margin: 0 0 2px;
   font-size: 12px;
-  color: #d97706;
+  color: var(--pf-marigold);
 `
 
 const RatingCount = styled.span`
-  color: #9ca3af;
+  color: var(--pf-text-muted);
 `
 
 interface HoursProps {
@@ -120,8 +126,9 @@ interface HoursProps {
 const Hours = styled.p<HoursProps>`
   margin: 0;
   font-size: 12px;
-  font-weight: 500;
-  color: ${({ $isOpen }) => ($isOpen ? '#16a34a' : '#ef4444')};
+  font-weight: 700;
+  /* open: dark green from the mood board's "free" badge text (#3B6D11) */
+  color: ${({ $isOpen }) => ($isOpen ? '#3b6d11' : 'var(--pf-tomato)')};
 `
 
 interface Props {
