@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 import type { Court } from '../types'
+import { palette } from '../theme'
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
 
@@ -124,8 +125,8 @@ export function usePickleballMap() {
           const pin = new PinElement({
             glyphText: String(i + 1),
             glyphColor: 'white',
-            background: '#16a34a',
-            borderColor: '#15803d',
+            background: palette.terracotta,
+            borderColor: palette.terracottaDark,
           })
           const marker = new AdvancedMarkerElement({
             map,

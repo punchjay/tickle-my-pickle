@@ -2,10 +2,11 @@ import { useState, type FormEvent } from 'react'
 import styled from 'styled-components'
 
 const Wrapper = styled.div`
-  background: #fff;
-  border-radius: 10px;
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border-soft);
+  border-radius: var(--pf-radius-md);
   padding: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 12px rgba(30, 45, 73, 0.18);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -18,57 +19,62 @@ const SearchForm = styled.form`
 
 const ZipInput = styled.input`
   flex: 1;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-sm);
   padding: 9px 12px;
   font-size: 15px;
+  font-family: var(--pf-font-body);
   outline: none;
   transition: border-color 0.15s;
 
   &:focus {
-    border-color: #16a34a;
+    border-color: var(--pf-primary);
   }
 
   &:disabled {
-    background: #f9fafb;
-    color: #9ca3af;
+    background: var(--pf-ivory);
+    color: var(--pf-text-muted);
   }
 `
 
 const SearchButton = styled.button`
-  background: #16a34a;
-  color: #fff;
+  background: var(--pf-primary);
+  color: var(--pf-card);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--pf-radius-sm);
   padding: 9px 18px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
+  font-family: var(--pf-font-body);
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.15s;
 
   &:hover:not(:disabled) {
-    background: #15803d;
+    background: var(--pf-primary-hover);
   }
 
   &:disabled {
-    background: #d1d5db;
+    background: var(--pf-border);
     cursor: not-allowed;
   }
 `
 
 const GeoButton = styled.button`
   width: 100%;
-  background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  background: var(--pf-ivory);
+  color: var(--pf-link);
+  border: 1.5px solid var(--pf-link);
+  border-radius: var(--pf-radius-sm);
   padding: 9px;
   font-size: 14px;
+  font-weight: 500;
+  font-family: var(--pf-font-body);
   cursor: pointer;
   transition: background 0.15s;
 
   &:hover:not(:disabled) {
-    background: #f9fafb;
+    background: var(--pf-surface);
   }
 
   &:disabled {

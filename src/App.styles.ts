@@ -27,11 +27,11 @@ export const OverlayTop = styled.div`
 
 export const ErrorBanner = styled.p`
   margin: 0;
-  background: #fff;
-  border-left: 4px solid #ef4444;
-  border-radius: 6px;
+  background: var(--pf-card);
+  border-left: 4px solid var(--pf-tomato);
+  border-radius: var(--pf-radius-sm);
   padding: 10px 14px;
   font-size: 13px;
-  color: #374151;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  color: var(--pf-text);
+  box-shadow: 0 2px 8px rgba(30, 45, 73, 0.18);
 `
