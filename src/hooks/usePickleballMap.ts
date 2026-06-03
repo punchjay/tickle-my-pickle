@@ -148,21 +148,21 @@ export function usePickleballMap() {
     [clearMarkers],
   )
 
-  const handleZipSubmit = useCallback(
-    (zip: string) => {
+  const handleSearch = useCallback(
+    (query: string) => {
       if (!mapsReady) return
       setLoading(true)
       setError(null)
       const geocoder = new google.maps.Geocoder()
       geocoder.geocode(
-        { address: zip, componentRestrictions: { country: 'US' } },
+        { address: query, componentRestrictions: { country: 'US' } },
         (results, status) => {
           if (status === 'OK' && results?.[0]) {
             const loc = results[0].geometry.location
             searchNearby({ lat: loc.lat(), lng: loc.lng() })
           } else {
             setLoading(false)
-            setError('Could not find that zip code. Try again.')
+            setError('Could not find that location. Try again.')
           }
         },
       )
@@ -197,7 +197,7 @@ export function usePickleballMap() {
     loading,
     error,
     mapsReady,
-    handleZipSubmit,
+    handleSearch,
     handleGeolocate,
     handleCourtSelect,
   }

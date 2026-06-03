@@ -19,13 +19,13 @@ function App() {
     loading,
     error,
     mapsReady,
-    handleZipSubmit,
+    handleSearch,
     handleGeolocate,
     handleCourtSelect,
   } = usePickleballMap()
 
   return (
-    <AppWrapper>
+    <AppWrapper $mapVisible={courts.length > 0}>
       <MapDiv ref={mapDivRef} $visible={courts.length > 0} />
       <OverlayTop>
         <HeaderCard>
@@ -33,7 +33,7 @@ function App() {
           <Tagline>Find pickleball courts near you</Tagline>
         </HeaderCard>
         <LocationInput
-          onZipSubmit={handleZipSubmit}
+          onSearch={handleSearch}
           onGeolocate={handleGeolocate}
           loading={loading}
           disabled={!mapsReady}
