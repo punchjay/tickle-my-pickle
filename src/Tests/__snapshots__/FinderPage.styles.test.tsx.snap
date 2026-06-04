@@ -9,6 +9,32 @@ exports[`FinderPage.styles > AppWrapper drops the backdrop once the map is visib
   background: var(--pf-bg);
 }
 
+.c0::before {
+  content: '';
+  position: absolute;
+  inset: -240px;
+  background: linear-gradient(         rgba(239, 231, 211, 0.1),         rgba(239, 231, 211, 0.1)       ),repeating-linear-gradient(         110deg,         var(--pf-marigold) 0 36px,         var(--pf-tomato) 36px 72px,         var(--pf-court-blue) 72px 108px,         var(--pf-midnight) 108px 144px,         var(--pf-ivory) 144px 180px       );
+  animation: k0 12s linear infinite;
+  display: none;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c0::before {
+    animation: none;
+  }
+}
+
+@keyframes k0 {
+  from {
+    transform: translate(0, 0);
+  }
+
+  to {
+    transform: translate(-169.1px, -61.6px);
+  }
+}
+
 <div
   class="c0"
 />
@@ -20,7 +46,33 @@ exports[`FinderPage.styles > AppWrapper renders a div with the striped backdrop 
   width: 100vw;
   height: 100svh;
   overflow: hidden;
-  background: linear-gradient(           rgba(239, 231, 211, 0.1),           rgba(239, 231, 211, 0.1)         ),repeating-linear-gradient(           110deg,           var(--pf-marigold) 0 36px,           var(--pf-tomato) 36px 72px,           var(--pf-court-blue) 72px 108px,           var(--pf-midnight) 108px 144px,           var(--pf-ivory) 144px 180px         );
+  background: var(--pf-bg);
+}
+
+.c0::before {
+  content: '';
+  position: absolute;
+  inset: -240px;
+  background: linear-gradient(         rgba(239, 231, 211, 0.1),         rgba(239, 231, 211, 0.1)       ),repeating-linear-gradient(         110deg,         var(--pf-marigold) 0 36px,         var(--pf-tomato) 36px 72px,         var(--pf-court-blue) 72px 108px,         var(--pf-midnight) 108px 144px,         var(--pf-ivory) 144px 180px       );
+  animation: k0 12s linear infinite;
+  display: block;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c0::before {
+    animation: none;
+  }
+}
+
+@keyframes k0 {
+  from {
+    transform: translate(0, 0);
+  }
+
+  to {
+    transform: translate(-169.1px, -61.6px);
+  }
 }
 
 <div
