@@ -75,6 +75,37 @@ describe('LocationInput', () => {
     expect(screen.getByRole('button', { name: /near me/i })).toBeDisabled()
   })
 
+  it('shows a spinner while the map is initializing', () => {
+    render(
+      <LocationInput
+        onSearch={() => {}}
+        onGeolocate={() => {}}
+        loading={false}
+        disabled={true}
+        initializing={true}
+      />,
+    )
+    const button = screen.getByRole('button', { name: 'Search' })
+    // Spinner is a <span>; the static SearchIcon is an <svg>.
+    expect(button.querySelector('svg')).toBeNull()
+    expect(button.querySelector('span')).toBeInTheDocument()
+  })
+
+  it('shows the static search icon when ready and idle', () => {
+    render(
+      <LocationInput
+        onSearch={() => {}}
+        onGeolocate={() => {}}
+        loading={false}
+        disabled={false}
+        initializing={false}
+      />,
+    )
+    expect(
+      screen.getByRole('button', { name: 'Search' }).querySelector('svg'),
+    ).toBeInTheDocument()
+  })
+
   it('trims surrounding whitespace before submitting', () => {
     const onSearch = vi.fn()
     render(

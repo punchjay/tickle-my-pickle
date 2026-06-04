@@ -57,6 +57,8 @@ interface Props {
   onGeolocate: () => void
   loading: boolean
   disabled: boolean
+  // Maps SDK still loading on first mount — spin the icon to signal "not yet".
+  initializing?: boolean
 }
 
 export default function LocationInput({
@@ -64,8 +66,10 @@ export default function LocationInput({
   onGeolocate,
   loading,
   disabled,
+  initializing = false,
 }: Props) {
   const [query, setQuery] = useState('')
+  const busy = loading || initializing
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -81,7 +85,7 @@ export default function LocationInput({
           disabled={disabled || loading}
           aria-label={search.submitLabel}
         >
-          {loading ? <Spinner /> : <SearchIcon />}
+          {busy ? <Spinner /> : <SearchIcon />}
         </IconButton>
         <SearchInput
           type="text"
