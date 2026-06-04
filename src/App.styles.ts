@@ -61,7 +61,7 @@ export const Wordmark = styled.h1`
   margin: 0;
   font-family: var(--pf-font-accent);
   font-weight: 600;
-  font-size: 1.7rem;
+  font-size: 2.4rem;
   line-height: 1.1;
   letter-spacing: 0;
   color: var(--pf-midnight);
@@ -69,7 +69,7 @@ export const Wordmark = styled.h1`
 
 export const Tagline = styled.p`
   margin: 2px 0 0;
-  font-size: 12px;
+  font-size: 0.9375rem;
   font-weight: 500;
   color: var(--pf-text-muted);
 `
@@ -80,7 +80,7 @@ export const ErrorBanner = styled.p`
   border-left: 4px solid var(--pf-tomato);
   border-radius: var(--pf-radius-sm);
   padding: 10px 14px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--pf-text);
   box-shadow: 0 2px 8px rgba(30, 45, 73, 0.18);
 `

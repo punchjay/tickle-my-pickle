@@ -62,7 +62,7 @@ const SearchInput = styled.input`
   border: none;
   background: transparent;
   padding: 8px 0;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-family: var(--pf-font-body);
   color: var(--pf-text);
   outline: none;
@@ -92,7 +92,7 @@ const NearMeButton = styled.button`
   background: transparent;
   border-radius: var(--pf-radius-pill);
   padding: 8px 10px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   font-family: var(--pf-font-body);
   color: var(--pf-link);

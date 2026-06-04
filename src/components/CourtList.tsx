@@ -77,7 +77,7 @@ const CourtNum = styled.span<ItemProps>`
   background: ${({ $selected }) =>
     $selected ? 'var(--pf-primary-hover)' : 'var(--pf-primary)'};
   color: var(--pf-card);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -92,7 +92,7 @@ const Info = styled.div`
 
 const Name = styled.p`
   margin: 0 0 2px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--pf-text);
   white-space: nowrap;
@@ -102,7 +102,7 @@ const Name = styled.p`
 
 const Address = styled.p`
   margin: 0 0 4px;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--pf-text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -111,7 +111,7 @@ const Address = styled.p`
 
 const Rating = styled.p`
   margin: 0 0 2px;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--pf-marigold);
 `
 
@@ -125,7 +125,7 @@ interface HoursProps {
 
 const Hours = styled.p<HoursProps>`
   margin: 0;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   /* open: dark green from the mood board's "free" badge text (#3B6D11) */
   color: ${({ $isOpen }) => ($isOpen ? '#3b6d11' : 'var(--pf-tomato)')};
