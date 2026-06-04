@@ -38,6 +38,7 @@ function FinderPage() {
           onGeolocate={handleGeolocate}
           loading={loading}
           disabled={!mapsReady}
+          initializing={!mapsReady && !error}
         />
         {error && (
           <ErrorBanner role="alert" aria-live="assertive">
