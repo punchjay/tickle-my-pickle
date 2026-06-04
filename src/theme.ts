@@ -29,6 +29,8 @@ export const semantic = {
   link: palette.courtBlue,
   border: '#DCCFB0',
   borderSoft: '#E2D6BC',
+  open: '#3B6D11', // "open now" status (mood board "free" badge text)
+  closed: palette.tomato, // "closed" status
 } as const
 
 export const fonts = {
@@ -41,4 +43,8 @@ export const radii = {
   sm: '8px',
   md: '12px',
   pill: '999px',
+} as const
+
+export const shadows = {
+  card: '0 2px 12px rgba(30, 45, 73, 0.18)', // floating cards/panels
 } as const

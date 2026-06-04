@@ -11,7 +11,7 @@ exports[`CourtList > matches snapshot with a selected court 1`] = `
   background: var(--pf-card);
   border: 1px solid var(--pf-border-soft);
   border-radius: var(--pf-radius-md);
-  box-shadow: 0 2px 12px rgba(30, 45, 73, 0.18);
+  box-shadow: var(--pf-shadow-card);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -135,14 +135,14 @@ exports[`CourtList > matches snapshot with a selected court 1`] = `
   margin: 0;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #3b6d11;
+  color: var(--pf-open);
 }
 
 .c13 {
   margin: 0;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--pf-tomato);
+  color: var(--pf-closed);
 }
 
 @media (max-width: 640px) {
@@ -295,7 +295,7 @@ exports[`CourtList > matches snapshot with no selection 1`] = `
   background: var(--pf-card);
   border: 1px solid var(--pf-border-soft);
   border-radius: var(--pf-radius-md);
-  box-shadow: 0 2px 12px rgba(30, 45, 73, 0.18);
+  box-shadow: var(--pf-shadow-card);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -389,14 +389,14 @@ exports[`CourtList > matches snapshot with no selection 1`] = `
   margin: 0;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #3b6d11;
+  color: var(--pf-open);
 }
 
 .c11 {
   margin: 0;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--pf-tomato);
+  color: var(--pf-closed);
 }
 
 @media (max-width: 640px) {

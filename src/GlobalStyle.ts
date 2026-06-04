@@ -1,5 +1,5 @@
 import { createGlobalStyle } from 'styled-components'
-import { palette, semantic, fonts, radii } from './theme'
+import { palette, semantic, fonts, radii, shadows } from './theme'
 
 // Emits the retro theme as CSS custom properties on :root plus the themed
 // typographic base. The `--pf-*` names mirror the Dinkly mood board so the
@@ -30,6 +30,8 @@ export const GlobalStyle = createGlobalStyle`
     --pf-link: ${semantic.link};
     --pf-border: ${semantic.border};
     --pf-border-soft: ${semantic.borderSoft};
+    --pf-open: ${semantic.open};
+    --pf-closed: ${semantic.closed};
 
     /* Typography */
     --pf-font-display: ${fonts.display};
@@ -40,6 +42,9 @@ export const GlobalStyle = createGlobalStyle`
     --pf-radius-sm: ${radii.sm};
     --pf-radius-md: ${radii.md};
     --pf-radius-pill: ${radii.pill};
+
+    /* Elevation */
+    --pf-shadow-card: ${shadows.card};
   }
 
   body {
