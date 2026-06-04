@@ -7,9 +7,9 @@ import {
   Wordmark,
   Tagline,
   ErrorBanner,
-} from '@/App.styles'
+} from '@/pages/FinderPage.styles'
 
-describe('App.styles', () => {
+describe('FinderPage.styles', () => {
   it('AppWrapper renders a div with the striped backdrop before the map loads', () => {
     const { container } = render(<AppWrapper $mapVisible={false} />)
     expect(container.firstChild?.nodeName).toBe('DIV')
