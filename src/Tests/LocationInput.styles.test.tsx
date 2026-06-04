@@ -3,7 +3,6 @@ import {
   Wrapper,
   SearchForm,
   IconButton,
-  Spinner,
   SearchInput,
   Divider,
   NearMeButton,
@@ -25,12 +24,6 @@ describe('LocationInput.styles', () => {
   it('IconButton renders a button and matches snapshot', () => {
     const { container } = render(<IconButton />)
     expect(container.firstChild?.nodeName).toBe('BUTTON')
-    expect(container.firstChild).toMatchSnapshot()
-  })
-
-  it('Spinner renders a span and matches snapshot', () => {
-    const { container } = render(<Spinner />)
-    expect(container.firstChild?.nodeName).toBe('SPAN')
     expect(container.firstChild).toMatchSnapshot()
   })
 

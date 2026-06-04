@@ -111,21 +111,6 @@ exports[`LocationInput.styles > SearchInput renders an input and matches snapsho
 />
 `;
 
-exports[`LocationInput.styles > Spinner renders a span and matches snapshot 1`] = `
-.c0 {
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--pf-border);
-  border-top-color: var(--pf-primary);
-  border-radius: 50%;
-  animation: pf-spin 0.7s linear infinite;
-}
-
-<span
-  class="c0"
-/>
-`;
-
 exports[`LocationInput.styles > Wrapper renders a div and matches snapshot 1`] = `
 .c0 {
   display: flex;
