@@ -1,28 +1,57 @@
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
+
+/* Slide one full stripe period (5 bands × 36px = 180px) along the 110deg
+   gradient direction — d = (sin110°, -cos110°) ≈ (0.940, 0.342) — so the
+   pattern lands exactly on itself and loops seamlessly. GPU-accelerated
+   transform on an oversized layer keeps the motion smooth and visible. */
+const stripeSlide = keyframes`
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-169.1px, -61.6px);
+  }
+`
 
 export const AppWrapper = styled.div<{ $mapVisible: boolean }>`
   position: relative;
   width: 100vw;
   height: 100svh;
   overflow: hidden;
+  background: var(--pf-bg);
+
   /* Mood board "diagonal sunbeam stripes" shown before the map loads, under a
-     translucent ivory wash for a low-contrast texture. Dropped once the map is
+     translucent ivory wash for a low-contrast texture. Lives on an oversized
+     pseudo-element that drifts via transform, then is dropped once the map is
      visible (it covers this anyway). */
-  background: ${({ $mapVisible }) =>
-    $mapVisible
-      ? 'var(--pf-bg)'
-      : `linear-gradient(
-          rgba(239, 231, 211, 0.1),
-          rgba(239, 231, 211, 0.1)
-        ),
-        repeating-linear-gradient(
-          110deg,
-          var(--pf-marigold) 0 36px,
-          var(--pf-tomato) 36px 72px,
-          var(--pf-court-blue) 72px 108px,
-          var(--pf-midnight) 108px 144px,
-          var(--pf-ivory) 144px 180px
-        )`};
+  &::before {
+    content: '';
+    position: absolute;
+    /* Overscan so the translate never reveals an uncovered edge. */
+    inset: -240px;
+    background:
+      linear-gradient(
+        rgba(239, 231, 211, 0.1),
+        rgba(239, 231, 211, 0.1)
+      ),
+      repeating-linear-gradient(
+        110deg,
+        var(--pf-marigold) 0 36px,
+        var(--pf-tomato) 36px 72px,
+        var(--pf-court-blue) 72px 108px,
+        var(--pf-midnight) 108px 144px,
+        var(--pf-ivory) 144px 180px
+      );
+    animation: ${stripeSlide} 12s linear infinite;
+    display: ${({ $mapVisible }) => ($mapVisible ? 'none' : 'block')};
+    will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::before {
+      animation: none;
+    }
+  }
 `
 
 export const MapDiv = styled.div<{ $visible: boolean }>`
