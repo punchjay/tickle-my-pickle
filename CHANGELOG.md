@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v0.2.0...tickle-my-pickle-app-v0.3.0) (2026-06-04)
+
+
+### Features
+
+* add credit footer on the pre-search canvas ([#38](https://github.com/punchjay/tickle-my-pickle/issues/38)) ([87edfc1](https://github.com/punchjay/tickle-my-pickle/commit/87edfc1831fe532f3111851c18dcdf6659559f8c))
+* add React Router with finder + 404 pages (styling WIP) ([#33](https://github.com/punchjay/tickle-my-pickle/issues/33)) ([e26a030](https://github.com/punchjay/tickle-my-pickle/commit/e26a030a16d00527fd604c8408614e10b5ccdbe0))
+* spin search-pill icon during initial Maps SDK load ([#36](https://github.com/punchjay/tickle-my-pickle/issues/36)) ([d01f77a](https://github.com/punchjay/tickle-my-pickle/commit/d01f77a4f1236369d61d9090a61ba1f18cfce5ee))
+
 ## [0.2.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v0.1.1...tickle-my-pickle-app-v0.2.0) (2026-06-04)
 
 
