@@ -23,6 +23,12 @@ export const courtList = {
   closed: 'Closed',
 } as const
 
+export const footer = {
+  email: 'punchjay@gmail.com',
+  githubUrl: 'https://github.com/punchjay',
+  githubLabel: 'GitHub profile',
+} as const
+
 export const notFound = {
   code: '404',
   heading: 'Page not found',
