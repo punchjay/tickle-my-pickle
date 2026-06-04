@@ -59,6 +59,8 @@ src/
     CourtList.styles.ts      # styled-components for CourtList
     ErrorBoundary.tsx        # top-level fallback (wraps App in main.tsx)
     ErrorBoundary.styles.ts  # styled-components for ErrorBoundary
+    Spinner.tsx              # RouteFallback: centered loader for the <Suspense> fallback
+    Spinner.styles.ts        # shared Spinner indicator (also used inline by LocationInput) + FullPageCenter
   Tests/
     App.test.tsx             # routing tests (finder at /, 404 at unknown route) via MemoryRouter
     LocationInput.test.tsx   # snapshot + interaction tests
@@ -69,6 +71,7 @@ src/
     CourtList.styles.test.tsx     # per-styled-component render + snapshot tests
     ErrorBoundary.styles.test.tsx # per-styled-component render + snapshot tests
     NotFoundPage.styles.test.tsx  # per-styled-component render + snapshot tests
+    Spinner.styles.test.tsx       # per-styled-component render + snapshot tests
     __snapshots__/           # committed — update with: vitest -u
 ```
 
@@ -79,6 +82,8 @@ composition layer. Components and tests depend on the `Court` interface in
 ## Routing
 
 React Router v7. `main.tsx` wraps the app in `<BrowserRouter basename={import.meta.env.BASE_URL}>` — `BASE_URL` is `/tickle-my-pickle/` in the GitHub Actions build and `/` locally (set by Vite's `base`), so the router and the deploy path always agree. `App.tsx` is the route table; route-level components live in `src/pages/` (one `*.tsx` + sibling `*.styles.ts` each), other UI in `src/components/`.
+
+`FinderPage` (the primary route) is eager; `NotFoundPage` is **lazy-loaded** (`React.lazy` → its own build chunk) behind a `<Suspense>` whose fallback is `RouteFallback` (`components/Spinner.tsx`, a centered shared `Spinner`). Because the 404 is async, `App.test.tsx` awaits it with `findByRole`.
 
 **GitHub Pages has no SPA fallback** — it 404s on any path that isn't a real file, so client routes (and deep links / refreshes on them) break without a shim. `public/404.html` redirects unknown paths to `index.html` with the original path encoded in the query string; a small script at the top of `index.html`'s `<head>` restores it before the router mounts (the [spa-github-pages](https://github.com/rafgraph/spa-github-pages) trick). `404.html` uses `pathSegmentsToKeep = 1` to preserve the `/tickle-my-pickle/` base segment. When adding routes, no shim changes are needed; just keep `404.html` shipping from `public/`.
 
@@ -100,12 +105,13 @@ Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`)
 
 ## Testing
 
-Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Nine test files:
+Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Eleven test files:
 
-- **Routing** (`App.test.tsx`) — renders `<App />` inside a `MemoryRouter` and asserts the finder renders at `/` (header title/tagline + search input) and the 404 page renders at an unknown route. No DOM snapshot; the finder is too stateful and async to snapshot meaningfully.
+- **Routing** (`App.test.tsx`) — renders `<App />` inside a `MemoryRouter` and asserts the finder renders at `/` (header title/tagline + search input) and the 404 page renders at an unknown route (awaited with `findByRole` since `NotFoundPage` is lazy). No DOM snapshot; the finder is too stateful and async to snapshot meaningfully.
+- **Copy** (`appData.test.ts`) — unit-tests the only logic in `appData.ts`, `courtList.heading(count)` (singular/plural/zero). The other entries are constant strings, covered indirectly by the component/routing tests.
 - **Snapshot** (`CourtList.test.tsx`) — renders with mock court data and serializes the DOM. Catches unintended markup or style changes. Update snapshots intentionally with `vitest -u`.
 - **Snapshot + interaction** (`LocationInput.test.tsx`) — the search is a free-text pill (no ZIP/numeric gate). One snapshot for the default render; interaction tests use `fireEvent` (not `userEvent` — not installed) to verify submit (via the magnifying-glass submit button), the "Near me" geolocation action, and the disabled + loading states. The trim/guard tests dispatch `fireEvent.submit` on the form directly.
-- **Styled-components** (`FinderPage.styles.test.tsx`, `LocationInput.styles.test.tsx`, `CourtList.styles.test.tsx`, `ErrorBoundary.styles.test.tsx`, `NotFoundPage.styles.test.tsx`) — one per `*.styles.ts` file; each renders every export, asserts the element type, and snapshots the inlined CSS. Conditional styled-components are rendered in both prop states; `NotFoundPage`'s `HomeLink` (a `styled(Link)`) is wrapped in a `MemoryRouter`.
+- **Styled-components** (`FinderPage.styles.test.tsx`, `LocationInput.styles.test.tsx`, `CourtList.styles.test.tsx`, `ErrorBoundary.styles.test.tsx`, `NotFoundPage.styles.test.tsx`, `Spinner.styles.test.tsx`) — one per `*.styles.ts` file; each renders every export, asserts the element type, and snapshots the inlined CSS. Conditional styled-components are rendered in both prop states; `NotFoundPage`'s `HomeLink` (a `styled(Link)`) is wrapped in a `MemoryRouter`.
 - **Hook** (`usePickleballMap.test.tsx`) — drives the hook through a `Harness` component against a faked `google.maps` global (the fake `AdvancedMarkerElement` exposes `addEventListener`, matching the real HTMLElement). Captures the hook return in an effect (not during render) to satisfy `react-hooks` lint rules.
 
 `google.maps` types are globally available in tests via the `"google.maps"` entry in `src/Tests/tsconfig.json`. Mock court objects are plain `Court[]` literals (the `Court` interface in `types.ts` is a small view-model, so no casting is needed). `Element.prototype.scrollIntoView` is mocked with `vi.fn()` in `CourtList.test.tsx` since jsdom doesn't implement it.

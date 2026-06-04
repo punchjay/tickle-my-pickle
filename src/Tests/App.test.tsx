@@ -24,10 +24,11 @@ describe('App routing', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders the 404 page for an unknown route', () => {
+  it('renders the 404 page for an unknown route', async () => {
     renderAt('/does-not-exist')
+    // NotFoundPage is lazy-loaded behind <Suspense>, so it resolves async.
     expect(
-      screen.getByRole('heading', { name: 'Page not found' }),
+      await screen.findByRole('heading', { name: 'Page not found' }),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('link', { name: /back to the courts/i }),

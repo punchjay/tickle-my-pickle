@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react'
 import { search } from '../appData'
+import { Spinner } from './Spinner.styles'
 import {
   Wrapper,
   SearchForm,
   IconButton,
-  Spinner,
   SearchInput,
   Divider,
   NearMeButton,

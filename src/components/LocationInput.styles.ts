@@ -40,21 +40,6 @@ export const IconButton = styled.button`
   }
 `
 
-export const Spinner = styled.span`
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--pf-border);
-  border-top-color: var(--pf-primary);
-  border-radius: 50%;
-  animation: pf-spin 0.7s linear infinite;
-
-  @keyframes pf-spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-`
-
 export const SearchInput = styled.input`
   flex: 1;
   min-width: 0;
