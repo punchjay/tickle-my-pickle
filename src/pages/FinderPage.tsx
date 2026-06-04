@@ -1,5 +1,6 @@
 import LocationInput from '../components/LocationInput'
 import CourtList from '../components/CourtList'
+import Footer from '../components/Footer'
 import { usePickleballMap } from '../hooks/usePickleballMap'
 import { app } from '../appData'
 import {
@@ -46,12 +47,14 @@ function FinderPage() {
           </ErrorBanner>
         )}
       </OverlayTop>
-      {courts.length > 0 && (
+      {courts.length > 0 ? (
         <CourtList
           courts={courts}
           selectedCourt={selectedCourt}
           onSelect={handleCourtSelect}
         />
+      ) : (
+        <Footer />
       )}
     </AppWrapper>
   )
