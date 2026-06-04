@@ -90,12 +90,33 @@ exports[`App.styles > MapDiv renders a div and matches snapshot when visible 1`]
 />
 `;
 
-exports[`App.styles > OverlayTop renders a div and matches snapshot 1`] = `
+exports[`App.styles > OverlayTop renders centered above the middle before the map loads 1`] = `
 .c0 {
   position: absolute;
-  top: 16px;
   left: 50%;
-  transform: translateX(-50%);
+  top: 40%;
+  transform: translate(-50%, -50%);
+  transition: top 0.5s ease,transform 0.5s ease;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: min(400px, calc(100vw - 32px));
+}
+
+<div
+  class="c0"
+/>
+`;
+
+exports[`App.styles > OverlayTop slides to the top once the map is visible 1`] = `
+.c0 {
+  position: absolute;
+  left: 50%;
+  top: 16px;
+  transform: translate(-50%, 0);
+  transition: top 0.5s ease,transform 0.5s ease;
   z-index: 10;
   display: flex;
   flex-direction: column;
