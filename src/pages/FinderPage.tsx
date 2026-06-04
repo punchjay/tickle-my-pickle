@@ -1,6 +1,7 @@
 import LocationInput from '../components/LocationInput'
 import CourtList from '../components/CourtList'
 import { usePickleballMap } from '../hooks/usePickleballMap'
+import { app } from '../appData'
 import {
   AppWrapper,
   MapDiv,
@@ -29,8 +30,8 @@ function FinderPage() {
       <MapDiv ref={mapDivRef} $visible={courts.length > 0} />
       <OverlayTop $mapVisible={courts.length > 0}>
         <HeaderCard>
-          <Wordmark>Tickle My Pickle</Wordmark>
-          <Tagline>Find pickleball courts near you</Tagline>
+          <Wordmark>{app.wordmark}</Wordmark>
+          <Tagline>{app.tagline}</Tagline>
         </HeaderCard>
         <LocationInput
           onSearch={handleSearch}

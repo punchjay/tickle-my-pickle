@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { search } from '../appData'
 import {
   Wrapper,
   SearchForm,
@@ -75,16 +76,20 @@ export default function LocationInput({
   return (
     <Wrapper>
       <SearchForm onSubmit={handleSubmit}>
-        <IconButton type="submit" disabled={disabled || loading} aria-label="Search">
+        <IconButton
+          type="submit"
+          disabled={disabled || loading}
+          aria-label={search.submitLabel}
+        >
           {loading ? <Spinner /> : <SearchIcon />}
         </IconButton>
         <SearchInput
           type="text"
-          placeholder="Search city, ZIP, or neighborhood"
+          placeholder={search.placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           disabled={disabled || loading}
-          aria-label="Search location"
+          aria-label={search.inputLabel}
         />
       </SearchForm>
       <Divider aria-hidden="true" />
@@ -94,7 +99,7 @@ export default function LocationInput({
         disabled={disabled || loading}
       >
         <NearMeIcon />
-        Near me
+        {search.nearMe}
       </NearMeButton>
     </Wrapper>
   )
