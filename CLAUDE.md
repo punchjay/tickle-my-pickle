@@ -27,7 +27,7 @@ React 19 + TypeScript 6 + Vite 8 + styled-components v6. Entry point is `src/mai
 
 ## What this app does
 
-Pickleball court finder. User enters a zip code or uses browser geolocation; the app geocodes the location and runs a Google Maps Places nearby search (keyword: "pickleball", 10-mile radius), drops numbered markers on the map, and shows a scrollable sidebar of results with name, address, rating, and open/closed status.
+Pickleball court finder. User enters a free-text location (city, ZIP, or neighborhood) or uses browser geolocation; the app geocodes the location and runs a Google Maps Places text search ("pickleball court", ~10-mile location bias), drops numbered markers on the map, and shows a scrollable sidebar of results with name, address, rating, and open/closed status.
 
 ## Environment
 
@@ -38,21 +38,29 @@ Requires `VITE_GOOGLE_MAPS_API_KEY` in `.env.local` (gitignored). See `.env.exam
 ```
 src/
   App.tsx                    # root: composes map + overlay UI from the hook
+  App.styles.ts              # styled-components for App.tsx
   types.ts                   # Court view-model (decoupled from google.maps types)
+  theme.ts                   # typed design tokens (palette/semantic/fonts/radii/shadows) — source of truth
+  GlobalStyle.ts             # createGlobalStyle: emits --pf-* CSS vars on :root + base type
+  index.css                  # global reset only (box-sizing, html/body height)
   hooks/
     usePickleballMap.ts      # map init, geocoding, Places search, marker state
   components/
-    LocationInput.tsx        # zip input + geolocation button
+    LocationInput.tsx        # search pill: free-text location input + "Near me" geolocation
+    LocationInput.styles.ts  # styled-components for LocationInput
     CourtList.tsx            # sidebar list of nearby courts
+    CourtList.styles.ts      # styled-components for CourtList
     ErrorBoundary.tsx        # top-level fallback (wraps App in main.tsx)
-  index.css                  # global reset only (box-sizing, html/body height)
-  App.styles.ts              # styled-components for App.tsx
+    ErrorBoundary.styles.ts  # styled-components for ErrorBoundary
   Tests/
-    App.test.tsx             # smoke test (renders without crashing)
+    App.test.tsx             # smoke test (mounts; asserts header + search render)
     LocationInput.test.tsx   # snapshot + interaction tests
     CourtList.test.tsx       # snapshot tests (unselected and selected states)
-    App.styles.test.tsx      # per-styled-component render + snapshot tests
     usePickleballMap.test.tsx # hook tests against a faked google.maps global
+    App.styles.test.tsx           # per-styled-component render + snapshot tests
+    LocationInput.styles.test.tsx # per-styled-component render + snapshot tests
+    CourtList.styles.test.tsx     # per-styled-component render + snapshot tests
+    ErrorBoundary.styles.test.tsx # per-styled-component render + snapshot tests
     __snapshots__/           # committed — update with: vitest -u
 ```
 
@@ -62,7 +70,11 @@ composition layer. Components and tests depend on the `Court` interface in
 
 ## Styling
 
-All component styles use **styled-components** (no CSS modules, no utility classes). Conditional styles use transient props (`$propName`) to avoid leaking custom props to the DOM. The only global CSS is `index.css` (reset only); per-component styles live alongside their component, and `App.tsx`'s styles are in `App.styles.ts`.
+All component styles use **styled-components** (no CSS modules, no utility classes). Conditional styles use transient props (`$propName`) to avoid leaking custom props to the DOM.
+
+**Theme tokens are CSS custom properties (`--pf-*`).** `theme.ts` is the typed source of truth (palette/semantic/fonts/radii/shadows); `GlobalStyle.ts` (`createGlobalStyle`) emits them on `:root` plus the base typography; styled-components reference them via `var(--pf-*)`. This was chosen over a styled-components `ThemeProvider` so snapshots stay deterministic and tests need no provider wrapping. `index.css` is reset-only — `GlobalStyle` carries the themed globals. Non-CSS consumers (e.g. the map `PinElement` colors) import the `palette` object from `theme.ts`.
+
+**Each component keeps its styled-components in a sibling `*.styles.ts`** (`LocationInput.styles.ts`, `CourtList.styles.ts`, `ErrorBoundary.styles.ts`), and `App.tsx`'s styles are in `App.styles.ts`. The component file imports them by name. Prefer a token over a raw hex; a couple of genuine one-offs remain inline (the search pill's white background and placeholder color).
 
 ## TypeScript
 
@@ -74,12 +86,12 @@ Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`)
 
 ## Testing
 
-Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Five test files:
+Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Eight test files:
 
-- **Smoke** (`App.test.tsx`) — confirms the root component mounts without crashing. No snapshot; `App` is too stateful and async to snapshot meaningfully.
+- **Smoke** (`App.test.tsx`) — confirms the root component mounts without crashing and that the header card title/tagline and search input render. No DOM snapshot; `App` is too stateful and async to snapshot meaningfully.
 - **Snapshot** (`CourtList.test.tsx`) — renders with mock court data and serializes the DOM. Catches unintended markup or style changes. Update snapshots intentionally with `vitest -u`.
-- **Snapshot + interaction** (`LocationInput.test.tsx`) — one snapshot for the default render; interaction tests use `fireEvent` (not `userEvent` — not installed) to verify submit behavior, the 5-digit gate on the Search button, and the disabled state. The trim/guard tests dispatch `fireEvent.submit` on the form directly, since the input's numeric `pattern` blocks button-click submission for non-matching values.
-- **Styled-components** (`App.styles.test.tsx`) — renders each `App.styles.ts` export, asserts the element type, and snapshots the inlined CSS.
+- **Snapshot + interaction** (`LocationInput.test.tsx`) — the search is a free-text pill (no ZIP/numeric gate). One snapshot for the default render; interaction tests use `fireEvent` (not `userEvent` — not installed) to verify submit (via the magnifying-glass submit button), the "Near me" geolocation action, and the disabled + loading states. The trim/guard tests dispatch `fireEvent.submit` on the form directly.
+- **Styled-components** (`App.styles.test.tsx`, `LocationInput.styles.test.tsx`, `CourtList.styles.test.tsx`, `ErrorBoundary.styles.test.tsx`) — one per `*.styles.ts` file; each renders every export, asserts the element type, and snapshots the inlined CSS. Conditional styled-components are rendered in both prop states.
 - **Hook** (`usePickleballMap.test.tsx`) — drives the hook through a `Harness` component against a faked `google.maps` global (the fake `AdvancedMarkerElement` exposes `addEventListener`, matching the real HTMLElement). Captures the hook return in an effect (not during render) to satisfy `react-hooks` lint rules.
 
 `google.maps` types are globally available in tests via the `"google.maps"` entry in `src/Tests/tsconfig.json`. Mock court objects are plain `Court[]` literals (the `Court` interface in `types.ts` is a small view-model, so no casting is needed). `Element.prototype.scrollIntoView` is mocked with `vi.fn()` in `CourtList.test.tsx` since jsdom doesn't implement it.

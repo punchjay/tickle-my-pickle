@@ -59,7 +59,7 @@ export const HeaderCard = styled.header`
   border: 1px solid var(--pf-border-soft);
   border-radius: var(--pf-radius-md);
   padding: 12px 16px;
-  box-shadow: 0 2px 12px rgba(30, 45, 73, 0.18);
+  box-shadow: var(--pf-shadow-card);
   text-align: center;
 `
 

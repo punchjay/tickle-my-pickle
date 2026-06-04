@@ -1,29 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
-import styled from 'styled-components'
-
-const Fallback = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  height: 100svh;
-  padding: 24px;
-  text-align: center;
-  font-family: system-ui, sans-serif;
-  color: #374151;
-`
-
-const RetryButton = styled.button`
-  background: #16a34a;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 9px 18px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-`
+import { Fallback, RetryButton } from './ErrorBoundary.styles'
 
 interface Props {
   children: ReactNode
