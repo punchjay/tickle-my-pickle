@@ -23,7 +23,7 @@ npx vitest run src/Tests/MyComponent.test.tsx
 
 ## Stack
 
-React 19 + TypeScript 6 + Vite 8 + styled-components v6. Entry point is `src/main.tsx` → `src/App.tsx`.
+React 19 + TypeScript 6 + Vite 8 + styled-components v6 + React Router v7. Entry point is `src/main.tsx` (wraps `<BrowserRouter>`) → `src/App.tsx` (route table) → `src/pages/*`.
 
 ## What this app does
 
@@ -36,13 +36,19 @@ Requires `VITE_GOOGLE_MAPS_API_KEY` in `.env.local` (gitignored). See `.env.exam
 ## Key files
 
 ```
+public/
+  404.html                   # GitHub Pages SPA deep-link shim (redirects to index.html)
 src/
-  App.tsx                    # root: composes map + overlay UI from the hook
-  App.styles.ts              # styled-components for App.tsx
+  App.tsx                    # route table (<Routes>): / → FinderPage, * → NotFoundPage
   types.ts                   # Court view-model (decoupled from google.maps types)
   theme.ts                   # typed design tokens (palette/semantic/fonts/radii/shadows) — source of truth
   GlobalStyle.ts             # createGlobalStyle: emits --pf-* CSS vars on :root + base type
   index.css                  # global reset only (box-sizing, html/body height)
+  pages/
+    FinderPage.tsx           # the finder: composes map + overlay UI from the hook
+    FinderPage.styles.ts     # styled-components for FinderPage
+    NotFoundPage.tsx         # 404 page (themed, links back home)
+    NotFoundPage.styles.ts   # styled-components for NotFoundPage
   hooks/
     usePickleballMap.ts      # map init, geocoding, Places search, marker state
   components/
@@ -53,20 +59,27 @@ src/
     ErrorBoundary.tsx        # top-level fallback (wraps App in main.tsx)
     ErrorBoundary.styles.ts  # styled-components for ErrorBoundary
   Tests/
-    App.test.tsx             # smoke test (mounts; asserts header + search render)
+    App.test.tsx             # routing tests (finder at /, 404 at unknown route) via MemoryRouter
     LocationInput.test.tsx   # snapshot + interaction tests
     CourtList.test.tsx       # snapshot tests (unselected and selected states)
     usePickleballMap.test.tsx # hook tests against a faked google.maps global
-    App.styles.test.tsx           # per-styled-component render + snapshot tests
+    FinderPage.styles.test.tsx    # per-styled-component render + snapshot tests
     LocationInput.styles.test.tsx # per-styled-component render + snapshot tests
     CourtList.styles.test.tsx     # per-styled-component render + snapshot tests
     ErrorBoundary.styles.test.tsx # per-styled-component render + snapshot tests
+    NotFoundPage.styles.test.tsx  # per-styled-component render + snapshot tests
     __snapshots__/           # committed — update with: vitest -u
 ```
 
-All map/search logic lives in `usePickleballMap.ts`; `App.tsx` is a thin
+All map/search logic lives in `usePickleballMap.ts`; `FinderPage.tsx` is a thin
 composition layer. Components and tests depend on the `Court` interface in
 `types.ts`, not on the Google Maps SDK shape.
+
+## Routing
+
+React Router v7. `main.tsx` wraps the app in `<BrowserRouter basename={import.meta.env.BASE_URL}>` — `BASE_URL` is `/tickle-my-pickle/` in the GitHub Actions build and `/` locally (set by Vite's `base`), so the router and the deploy path always agree. `App.tsx` is the route table; route-level components live in `src/pages/` (one `*.tsx` + sibling `*.styles.ts` each), other UI in `src/components/`.
+
+**GitHub Pages has no SPA fallback** — it 404s on any path that isn't a real file, so client routes (and deep links / refreshes on them) break without a shim. `public/404.html` redirects unknown paths to `index.html` with the original path encoded in the query string; a small script at the top of `index.html`'s `<head>` restores it before the router mounts (the [spa-github-pages](https://github.com/rafgraph/spa-github-pages) trick). `404.html` uses `pathSegmentsToKeep = 1` to preserve the `/tickle-my-pickle/` base segment. When adding routes, no shim changes are needed; just keep `404.html` shipping from `public/`.
 
 ## Styling
 
@@ -74,7 +87,7 @@ All component styles use **styled-components** (no CSS modules, no utility class
 
 **Theme tokens are CSS custom properties (`--pf-*`).** `theme.ts` is the typed source of truth (palette/semantic/fonts/radii/shadows); `GlobalStyle.ts` (`createGlobalStyle`) emits them on `:root` plus the base typography; styled-components reference them via `var(--pf-*)`. This was chosen over a styled-components `ThemeProvider` so snapshots stay deterministic and tests need no provider wrapping. `index.css` is reset-only — `GlobalStyle` carries the themed globals. Non-CSS consumers (e.g. the map `PinElement` colors) import the `palette` object from `theme.ts`.
 
-**Each component keeps its styled-components in a sibling `*.styles.ts`** (`LocationInput.styles.ts`, `CourtList.styles.ts`, `ErrorBoundary.styles.ts`), and `App.tsx`'s styles are in `App.styles.ts`. The component file imports them by name. Prefer a token over a raw hex; a couple of genuine one-offs remain inline (the search pill's white background and placeholder color).
+**Each component/page keeps its styled-components in a sibling `*.styles.ts`** (`LocationInput.styles.ts`, `CourtList.styles.ts`, `ErrorBoundary.styles.ts`, `pages/FinderPage.styles.ts`, `pages/NotFoundPage.styles.ts`). The component file imports them by name. Prefer a token over a raw hex; a couple of genuine one-offs remain inline (the search pill's white background and placeholder color).
 
 ## TypeScript
 
@@ -86,12 +99,12 @@ Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`)
 
 ## Testing
 
-Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Eight test files:
+Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Nine test files:
 
-- **Smoke** (`App.test.tsx`) — confirms the root component mounts without crashing and that the header card title/tagline and search input render. No DOM snapshot; `App` is too stateful and async to snapshot meaningfully.
+- **Routing** (`App.test.tsx`) — renders `<App />` inside a `MemoryRouter` and asserts the finder renders at `/` (header title/tagline + search input) and the 404 page renders at an unknown route. No DOM snapshot; the finder is too stateful and async to snapshot meaningfully.
 - **Snapshot** (`CourtList.test.tsx`) — renders with mock court data and serializes the DOM. Catches unintended markup or style changes. Update snapshots intentionally with `vitest -u`.
 - **Snapshot + interaction** (`LocationInput.test.tsx`) — the search is a free-text pill (no ZIP/numeric gate). One snapshot for the default render; interaction tests use `fireEvent` (not `userEvent` — not installed) to verify submit (via the magnifying-glass submit button), the "Near me" geolocation action, and the disabled + loading states. The trim/guard tests dispatch `fireEvent.submit` on the form directly.
-- **Styled-components** (`App.styles.test.tsx`, `LocationInput.styles.test.tsx`, `CourtList.styles.test.tsx`, `ErrorBoundary.styles.test.tsx`) — one per `*.styles.ts` file; each renders every export, asserts the element type, and snapshots the inlined CSS. Conditional styled-components are rendered in both prop states.
+- **Styled-components** (`FinderPage.styles.test.tsx`, `LocationInput.styles.test.tsx`, `CourtList.styles.test.tsx`, `ErrorBoundary.styles.test.tsx`, `NotFoundPage.styles.test.tsx`) — one per `*.styles.ts` file; each renders every export, asserts the element type, and snapshots the inlined CSS. Conditional styled-components are rendered in both prop states; `NotFoundPage`'s `HomeLink` (a `styled(Link)`) is wrapped in a `MemoryRouter`.
 - **Hook** (`usePickleballMap.test.tsx`) — drives the hook through a `Harness` component against a faked `google.maps` global (the fake `AdvancedMarkerElement` exposes `addEventListener`, matching the real HTMLElement). Captures the hook return in an effect (not during render) to satisfy `react-hooks` lint rules.
 
 `google.maps` types are globally available in tests via the `"google.maps"` entry in `src/Tests/tsconfig.json`. Mock court objects are plain `Court[]` literals (the `Court` interface in `types.ts` is a small view-model, so no casting is needed). `Element.prototype.scrollIntoView` is mocked with `vi.fn()` in `CourtList.test.tsx` since jsdom doesn't implement it.
