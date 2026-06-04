@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 import type { Court } from '../types'
 import { palette } from '../theme'
+import { errors, searchQuery, unknownCourt } from '../appData'
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
 
@@ -25,9 +26,7 @@ export function usePickleballMap() {
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(() =>
-    !apiKey || apiKey === 'YOUR_KEY_HERE'
-      ? 'Add your VITE_GOOGLE_MAPS_API_KEY to .env.local and restart the dev server.'
-      : null,
+    !apiKey || apiKey === 'YOUR_KEY_HERE' ? errors.missingApiKey : null,
   )
   const [mapsReady, setMapsReady] = useState(false)
 
@@ -53,7 +52,7 @@ export function usePickleballMap() {
         setMapsReady(true)
       })
       .catch(() => {
-        setError('Failed to load Google Maps. Check your API key.')
+        setError(errors.mapsLoadFailed)
       })
   }, [])
 
@@ -79,7 +78,7 @@ export function usePickleballMap() {
       try {
         const { Place } = google.maps.places
         const { places } = await Place.searchByText({
-          textQuery: 'pickleball court',
+          textQuery: searchQuery,
           fields: [
             'id',
             'displayName',
@@ -98,14 +97,14 @@ export function usePickleballMap() {
 
         if (!places || places.length === 0) {
           setLoading(false)
-          setError('No pickleball courts found nearby. Try a different location.')
+          setError(errors.noCourtsFound)
           return
         }
 
         const results: Court[] = await Promise.all(
           places.map(async (place) => ({
             id: place.id,
-            name: place.displayName ?? 'Unknown court',
+            name: place.displayName ?? unknownCourt,
             address: place.formattedAddress ?? '',
             rating: place.rating ?? undefined,
             userRatingCount: place.userRatingCount ?? undefined,
@@ -140,7 +139,7 @@ export function usePickleballMap() {
         })
       } catch (err) {
         console.error('Places searchByText failed:', err)
-        setError('Search failed. Please try again.')
+        setError(errors.searchFailed)
       } finally {
         setLoading(false)
       }
@@ -162,7 +161,7 @@ export function usePickleballMap() {
             searchNearby({ lat: loc.lat(), lng: loc.lng() })
           } else {
             setLoading(false)
-            setError('Could not find that location. Try again.')
+            setError(errors.locationNotFound)
           }
         },
       )
@@ -179,7 +178,7 @@ export function usePickleballMap() {
         searchNearby({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       () => {
         setLoading(false)
-        setError('Location access denied. Enter a zip code instead.')
+        setError(errors.geolocationDenied)
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
     )

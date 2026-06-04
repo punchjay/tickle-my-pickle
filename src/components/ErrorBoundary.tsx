@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { errorBoundary } from '../appData'
 import { Fallback, RetryButton } from './ErrorBoundary.styles'
 
 interface Props {
@@ -24,10 +25,10 @@ export default class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <Fallback role="alert">
-          <h1>Something went wrong</h1>
-          <p>The app hit an unexpected error.</p>
+          <h1>{errorBoundary.heading}</h1>
+          <p>{errorBoundary.message}</p>
           <RetryButton onClick={() => window.location.reload()}>
-            Reload
+            {errorBoundary.retry}
           </RetryButton>
         </Fallback>
       )

@@ -165,11 +165,7 @@ exports[`CourtList > matches snapshot with a selected court 1`] = `
       aria-live="polite"
       class="c1"
     >
-      3
-       pickleball 
-      courts
-       
-      nearby
+      3 pickleball courts nearby
     </h2>
     <ul
       class="c2"
@@ -419,11 +415,7 @@ exports[`CourtList > matches snapshot with no selection 1`] = `
       aria-live="polite"
       class="c1"
     >
-      3
-       pickleball 
-      courts
-       
-      nearby
+      3 pickleball courts nearby
     </h2>
     <ul
       class="c2"

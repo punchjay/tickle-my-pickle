@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { Court } from '../types'
+import { courtList } from '../appData'
 import {
   Sidebar,
   Header,
@@ -34,10 +35,7 @@ export default function CourtList({ courts, selectedCourt, onSelect }: Props) {
 
   return (
     <Sidebar>
-      <Header aria-live="polite">
-        {courts.length} pickleball {courts.length === 1 ? 'court' : 'courts'}{' '}
-        nearby
-      </Header>
+      <Header aria-live="polite">{courtList.heading(courts.length)}</Header>
       <List>
         {courts.map((court, i) => {
           const selected = court === selectedCourt
@@ -64,7 +62,7 @@ export default function CourtList({ courts, selectedCourt, onSelect }: Props) {
                 )}
                 {court.isOpen != null && (
                   <Hours $isOpen={court.isOpen}>
-                    {court.isOpen ? 'Open now' : 'Closed'}
+                    {court.isOpen ? courtList.openNow : courtList.closed}
                   </Hours>
                 )}
               </Info>

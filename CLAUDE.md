@@ -40,6 +40,7 @@ public/
   404.html                   # GitHub Pages SPA deep-link shim (redirects to index.html)
 src/
   App.tsx                    # route table (<Routes>): / → FinderPage, * → NotFoundPage
+  appData.ts                 # centralized UI copy (single source of truth for user-facing strings)
   types.ts                   # Court view-model (decoupled from google.maps types)
   theme.ts                   # typed design tokens (palette/semantic/fonts/radii/shadows) — source of truth
   GlobalStyle.ts             # createGlobalStyle: emits --pf-* CSS vars on :root + base type
