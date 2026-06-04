@@ -6,9 +6,12 @@ import { errors, searchQuery, unknownCourt } from '../appData'
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
 
-// Map ID required by AdvancedMarkerElement. DEMO_MAP_ID renders default styling
-// without Cloud-based map styling; swap for a real Map ID to customize.
-const MAP_ID = 'DEMO_MAP_ID'
+// Map ID required by AdvancedMarkerElement. A real Cloud-styled Map ID
+// (VITE_GOOGLE_MAPS_MAP_ID) applies the retro map theme — see docs/map-style.json
+// for the style to import in the Google Cloud console. Falls back to Google's
+// DEMO_MAP_ID (default styling) when unset, so dev works without one.
+const MAP_ID =
+  (import.meta.env.VITE_GOOGLE_MAPS_MAP_ID as string | undefined) || 'DEMO_MAP_ID'
 const SEARCH_RADIUS_METERS = 16093 // ~10 miles
 
 // Configure the loader once at module load. Calling setOptions() more than

@@ -33,6 +33,8 @@ Pickleball court finder. User enters a free-text location (city, ZIP, or neighbo
 
 Requires `VITE_GOOGLE_MAPS_API_KEY` in `.env.local` (gitignored). See `.env.example`. The Google Cloud project needs **Maps JavaScript API**, **Places API (New)**, and **Geocoding API** enabled. The key is website-restricted; because GitHub Pages sends an origin-only referer, the prod referer pattern must be `https://punchjay.github.io/*` (an origin, not a subpath).
 
+Optional `VITE_GOOGLE_MAPS_MAP_ID` selects a **Cloud-styled Map ID** for the retro map theme (import `docs/map-style.json` in the Google Cloud console → Map Management → Map styles, attach it to a Map ID, then set the env var locally + as a GitHub Actions secret — `deploy.yml` injects it). Unset → falls back to `DEMO_MAP_ID` (Google's default styling), so dev works without one.
+
 ## Key files
 
 ```
@@ -103,7 +105,9 @@ Strict mode with `noUnusedLocals`, `noUnusedParameters`, and `erasableSyntaxOnly
 
 ## Google Maps
 
-Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`). `setOptions` is called **once at module load** (not in the init effect) — StrictMode re-runs effects in dev and a second `setOptions` call warns. Loads four libraries at startup: `maps`, `places`, `geocoding`, `marker`. Court search uses the **new Places API** `google.maps.places.Place.searchByText` (text query "pickleball court" with a `locationBias`). Map pins use **`AdvancedMarkerElement`** (the map needs a `mapId` — `DEMO_MAP_ID` in dev) with numbered `PinElement` glyphs; use the **current**, non-deprecated API: `PinElement({ glyphText })`, pass the `PinElement` directly as `content` (not `pin.element`), and listen via `addEventListener('gmp-click', …)` (not `addListener('click', …)`). Google `Place` results are mapped into the local `Court` interface in the hook, so the rest of the app never touches the SDK shape.
+Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`). `setOptions` is called **once at module load** (not in the init effect) — StrictMode re-runs effects in dev and a second `setOptions` call warns. Loads four libraries at startup: `maps`, `places`, `geocoding`, `marker`. Court search uses the **new Places API** `google.maps.places.Place.searchByText` (text query "pickleball court" with a `locationBias`). Map pins use **`AdvancedMarkerElement`** (the map needs a `mapId` — `VITE_GOOGLE_MAPS_MAP_ID` if set, else `DEMO_MAP_ID`) with numbered `PinElement` glyphs; use the **current**, non-deprecated API: `PinElement({ glyphText })`, pass the `PinElement` directly as `content` (not `pin.element`), and listen via `addEventListener('gmp-click', …)` (not `addListener('click', …)`). Google `Place` results are mapped into the local `Court` interface in the hook, so the rest of the app never touches the SDK shape.
+
+**Map theming:** because the map uses a `mapId`, the legacy inline `styles: [...]` JSON option is ignored — color styling must be **Cloud-based**, attached to the Map ID. The retro style lives in `docs/map-style.json` (theme-derived: ivory land, court-blue water, warm roads, POI/transit hidden); import it in the console and point `VITE_GOOGLE_MAPS_MAP_ID` at the styled Map ID.
 
 ## Testing
 
