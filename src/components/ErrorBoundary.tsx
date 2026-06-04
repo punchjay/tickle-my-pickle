@@ -20,7 +20,7 @@ const RetryButton = styled.button`
   border: none;
   border-radius: 6px;
   padding: 9px 18px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
 `
