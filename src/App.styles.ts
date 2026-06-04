@@ -35,11 +35,17 @@ export const MapDiv = styled.div<{ $visible: boolean }>`
   transition: opacity 0.4s ease;
 `
 
-export const OverlayTop = styled.div`
+export const OverlayTop = styled.div<{ $mapVisible: boolean }>`
   position: absolute;
-  top: 16px;
   left: 50%;
-  transform: translateX(-50%);
+  /* Sits just above center before a search, then slides to the top once the
+     map is visible. */
+  top: ${({ $mapVisible }) => ($mapVisible ? '16px' : '40%')};
+  transform: ${({ $mapVisible }) =>
+    $mapVisible ? 'translate(-50%, 0)' : 'translate(-50%, -50%)'};
+  transition:
+    top 0.5s ease,
+    transform 0.5s ease;
   z-index: 10;
   display: flex;
   flex-direction: column;

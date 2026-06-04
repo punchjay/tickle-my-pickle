@@ -27,7 +27,7 @@ function App() {
   return (
     <AppWrapper $mapVisible={courts.length > 0}>
       <MapDiv ref={mapDivRef} $visible={courts.length > 0} />
-      <OverlayTop>
+      <OverlayTop $mapVisible={courts.length > 0}>
         <HeaderCard>
           <Wordmark>Tickle My Pickle</Wordmark>
           <Tagline>Find pickleball courts near you</Tagline>

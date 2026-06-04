@@ -34,8 +34,14 @@ describe('App.styles', () => {
     expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('OverlayTop renders a div and matches snapshot', () => {
-    const { container } = render(<OverlayTop />)
+  it('OverlayTop renders centered above the middle before the map loads', () => {
+    const { container } = render(<OverlayTop $mapVisible={false} />)
+    expect(container.firstChild?.nodeName).toBe('DIV')
+    expect(container.firstChild).toMatchSnapshot()
+  })
+
+  it('OverlayTop slides to the top once the map is visible', () => {
+    const { container } = render(<OverlayTop $mapVisible={true} />)
     expect(container.firstChild?.nodeName).toBe('DIV')
     expect(container.firstChild).toMatchSnapshot()
   })
