@@ -18,6 +18,8 @@ const FinderPage = () => {
     mapDivRef,
     courts,
     selectedCourt,
+    mapShown,
+    searchSeq,
     loading,
     error,
     mapsReady,
@@ -28,7 +30,7 @@ const FinderPage = () => {
 
   return (
     <AppWrapper $mapVisible={courts.length > 0}>
-      <MapDiv ref={mapDivRef} $visible={courts.length > 0} />
+      <MapDiv ref={mapDivRef} $visible={mapShown} />
       <OverlayTop $mapVisible={courts.length > 0}>
         <HeaderCard>
           <Wordmark $mapVisible={courts.length > 0}>{app.wordmark}</Wordmark>
@@ -49,6 +51,7 @@ const FinderPage = () => {
       </OverlayTop>
       {courts.length > 0 ? (
         <CourtList
+          key={searchSeq}
           courts={courts}
           selectedCourt={selectedCourt}
           onSelect={handleCourtSelect}

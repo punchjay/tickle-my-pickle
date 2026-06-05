@@ -139,6 +139,7 @@ describe('usePickleballMap', () => {
 
     expect(hookApi.error).toBeNull()
     expect(hookApi.courts).toHaveLength(2)
+    expect(hookApi.mapShown).toBe(true) // map fades in once results land
     expect(hookApi.courts[0]).toMatchObject({
       id: 'place_1',
       name: 'Court One',
@@ -169,12 +170,47 @@ describe('usePickleballMap', () => {
     expect(hookApi.courts[1].isOpen).toBe(true)
   })
 
+  it('keeps prior results during a re-search so the overlay does not slide back (regression)', async () => {
+    await renderReady()
+    await runSearch()
+    expect(hookApi.courts).toHaveLength(1)
+    const seqAfterFirst = hookApi.searchSeq
+
+    // Second search whose Places call we resolve by hand, to observe the
+    // in-flight state. Previously the hook cleared courts up front, which
+    // flipped courts.length to 0 and slid the header/search overlay down.
+    let resolveSearch!: (v: { places: FakePlace[] }) => void
+    searchByTextImpl = () =>
+      new Promise<{ places: FakePlace[] }>((res) => {
+        resolveSearch = res
+      })
+
+    act(() => hookApi.handleSearch('98101'))
+    await waitFor(() => expect(hookApi.loading).toBe(true))
+    // While the new search is in flight, the old results remain on screen.
+    expect(hookApi.courts).toHaveLength(1)
+    expect(hookApi.courts[0].name).toBe('Court One')
+
+    await act(async () => {
+      resolveSearch({
+        places: [makePlace({ id: 'place_2', displayName: 'Court Two' })],
+      })
+    })
+    await waitFor(() => expect(hookApi.loading).toBe(false))
+    // New results swap in place, without ever emptying.
+    expect(hookApi.courts).toHaveLength(1)
+    expect(hookApi.courts[0].name).toBe('Court Two')
+    // The list's fade key advances so its entrance animation replays.
+    expect(hookApi.searchSeq).toBe(seqAfterFirst + 1)
+  })
+
   it('reports when no courts are found', async () => {
     searchByTextImpl = () => Promise.resolve({ places: [] })
     await renderReady()
     await runSearch()
 
     expect(hookApi.courts).toHaveLength(0)
+    expect(hookApi.mapShown).toBe(false) // map stays hidden when nothing found
     expect(hookApi.error).toMatch(/no pickleball courts found/i)
   })
 
