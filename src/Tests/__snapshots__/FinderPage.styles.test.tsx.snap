@@ -14,7 +14,7 @@ exports[`FinderPage.styles > AppWrapper drops the backdrop once the map is visib
   position: absolute;
   inset: -240px;
   background: linear-gradient(         rgba(239, 231, 211, 0.1),         rgba(239, 231, 211, 0.1)       ),repeating-linear-gradient(         110deg,         var(--pf-marigold) 0 36px,         var(--pf-tomato) 36px 72px,         var(--pf-court-blue) 72px 108px,         var(--pf-midnight) 108px 144px,         var(--pf-ivory) 144px 180px       );
-  animation: k0 12s linear infinite;
+  animation: k0 0.9s ease both,k1 12s linear infinite;
   display: none;
   will-change: transform;
 }
@@ -25,13 +25,23 @@ exports[`FinderPage.styles > AppWrapper drops the backdrop once the map is visib
   }
 }
 
-@keyframes k0 {
+@keyframes k1 {
   from {
     transform: translate(0, 0);
   }
 
   to {
     transform: translate(-169.1px, -61.6px);
+  }
+}
+
+@keyframes k0 {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
@@ -54,7 +64,7 @@ exports[`FinderPage.styles > AppWrapper renders a div with the striped backdrop 
   position: absolute;
   inset: -240px;
   background: linear-gradient(         rgba(239, 231, 211, 0.1),         rgba(239, 231, 211, 0.1)       ),repeating-linear-gradient(         110deg,         var(--pf-marigold) 0 36px,         var(--pf-tomato) 36px 72px,         var(--pf-court-blue) 72px 108px,         var(--pf-midnight) 108px 144px,         var(--pf-ivory) 144px 180px       );
-  animation: k0 12s linear infinite;
+  animation: k0 0.9s ease both,k1 12s linear infinite;
   display: block;
   will-change: transform;
 }
@@ -65,13 +75,23 @@ exports[`FinderPage.styles > AppWrapper renders a div with the striped backdrop 
   }
 }
 
-@keyframes k0 {
+@keyframes k1 {
   from {
     transform: translate(0, 0);
   }
 
   to {
     transform: translate(-169.1px, -61.6px);
+  }
+}
+
+@keyframes k0 {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
@@ -149,12 +169,29 @@ exports[`FinderPage.styles > OverlayTop renders centered above the middle before
   top: 40%;
   transform: translate(-50%, -50%);
   transition: top 0.5s ease,transform 0.5s ease;
+  animation: k0 0.9s ease 0.15s both;
   z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 8px;
   width: min(400px, calc(100vw - 32px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c0 {
+    animation: none;
+  }
+}
+
+@keyframes k0 {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 <div
@@ -169,12 +206,29 @@ exports[`FinderPage.styles > OverlayTop slides to the top once the map is visibl
   top: 16px;
   transform: translate(-50%, 0);
   transition: top 0.5s ease,transform 0.5s ease;
+  animation: k0 0.9s ease 0.15s both;
   z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 8px;
   width: min(400px, calc(100vw - 32px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c0 {
+    animation: none;
+  }
+}
+
+@keyframes k0 {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 <div
@@ -185,7 +239,7 @@ exports[`FinderPage.styles > OverlayTop slides to the top once the map is visibl
 exports[`FinderPage.styles > Tagline renders a p and matches snapshot 1`] = `
 .c0 {
   margin: 2px 0 0;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--pf-text-muted);
 }
