@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.1.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.0.0...tickle-my-pickle-app-v1.1.0) (2026-06-05)
+
+
+### Features
+
+* fade in backdrop stripes and cards on load ([#49](https://github.com/punchjay/tickle-my-pickle/issues/49)) ([f83efd6](https://github.com/punchjay/tickle-my-pickle/commit/f83efd6b821c2c4118a1428e135d81e6a7247150))
+* tint the wordmark by search state ([#54](https://github.com/punchjay/tickle-my-pickle/issues/54)) ([ce83d56](https://github.com/punchjay/tickle-my-pickle/commit/ce83d56d6dbc1a80b3772b8c76adf5fb102dcbe4))
+
+
+### Bug Fixes
+
+* keep overlay pinned and fade map/results in on re-search ([#55](https://github.com/punchjay/tickle-my-pickle/issues/55)) ([34252d4](https://github.com/punchjay/tickle-my-pickle/commit/34252d409c871936e715f3bc3066ab343f2210b2))
+* prevent iOS keyboard from bumping cards off-screen ([#51](https://github.com/punchjay/tickle-my-pickle/issues/51)) ([6645b94](https://github.com/punchjay/tickle-my-pickle/commit/6645b94def37c98c749f94b75703c79318aeab37))
+
 ## [1.0.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v0.3.0...tickle-my-pickle-app-v1.0.0) (2026-06-05)
 
 
