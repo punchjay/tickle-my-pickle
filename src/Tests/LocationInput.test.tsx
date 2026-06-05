@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import LocationInput from '@/components/LocationInput'
 
-const PLACEHOLDER = 'Search city, ZIP, or neighborhood'
+const PLACEHOLDER = 'Search City, ZIP, or Hood'
 
 describe('LocationInput', () => {
   it('calls onSearch with the entered query on submit', () => {
