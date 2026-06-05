@@ -56,6 +56,34 @@ export const Header = styled.h2`
   flex-shrink: 0;
 `
 
+export const Tabs = styled.div`
+  display: flex;
+  gap: 4px;
+  padding: 8px 8px 0;
+  flex-shrink: 0;
+`
+
+interface TabProps {
+  $active: boolean
+}
+
+export const TabButton = styled.button<TabProps>`
+  flex: 1;
+  border: none;
+  border-radius: var(--pf-radius-sm) var(--pf-radius-sm) 0 0;
+  padding: 8px 10px;
+  font-family: var(--pf-font-body);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: ${({ $active }) => ($active ? 'var(--pf-ivory)' : 'transparent')};
+  color: ${({ $active }) => ($active ? 'var(--pf-text)' : 'var(--pf-text-muted)')};
+
+  &:hover {
+    color: var(--pf-text);
+  }
+`
+
 export const List = styled.ul`
   list-style: none;
   margin: 0;
@@ -160,4 +188,43 @@ export const DirectionsLink = styled.a`
   &:hover {
     text-decoration: underline;
   }
+`
+
+interface StarProps {
+  $active: boolean
+}
+
+// Star toggle. Colors come straight from the theme: active is the marigold
+// ratings accent (filled), inactive is a muted caramel outline.
+export const StarButton = styled.button<StarProps>`
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: -4px -4px 0 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: ${({ $active }) =>
+    $active ? 'var(--pf-marigold)' : 'var(--pf-text-muted)'};
+  transition:
+    color 0.12s,
+    transform 0.12s;
+
+  &:hover {
+    color: var(--pf-marigold);
+    transform: scale(1.1);
+  }
+`
+
+export const EmptySaved = styled.p`
+  margin: 0;
+  padding: 24px 20px;
+  text-align: center;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--pf-text-muted);
 `

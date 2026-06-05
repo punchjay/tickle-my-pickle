@@ -2,6 +2,7 @@ import LocationInput from '../components/LocationInput'
 import CourtList from '../components/CourtList'
 import Footer from '../components/Footer'
 import { usePickleballMap } from '../hooks/usePickleballMap'
+import { useFavorites } from '../hooks/useFavorites'
 import { app } from '../appData'
 import {
   AppWrapper,
@@ -27,6 +28,7 @@ const FinderPage = () => {
     handleGeolocate,
     handleCourtSelect,
   } = usePickleballMap()
+  const { favorites, isFavorite, toggleFavorite } = useFavorites()
 
   return (
     <AppWrapper $mapVisible={courts.length > 0}>
@@ -55,6 +57,9 @@ const FinderPage = () => {
           courts={courts}
           selectedCourt={selectedCourt}
           onSelect={handleCourtSelect}
+          favorites={favorites}
+          isFavorite={isFavorite}
+          onToggleFavorite={toggleFavorite}
         />
       ) : (
         <Footer />

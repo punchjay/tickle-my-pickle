@@ -22,6 +22,11 @@ export const courtList = {
   openNow: 'Open now',
   closed: 'Closed',
   directions: 'Directions',
+  nearbyTab: 'Nearby',
+  savedTab: 'Saved',
+  save: 'Save court',
+  unsave: 'Remove from saved',
+  emptySaved: 'No saved courts yet — tap the star on a court to save it.',
 } as const
 
 export const footer = {

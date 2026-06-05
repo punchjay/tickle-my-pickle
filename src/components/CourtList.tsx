@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Court } from '../types'
 import { courtList } from '../appData'
 import {
   Sidebar,
-  Header,
+  Tabs,
+  TabButton,
   List,
   Item,
   CourtNum,
@@ -14,12 +15,17 @@ import {
   RatingCount,
   Hours,
   DirectionsLink,
+  StarButton,
+  EmptySaved,
 } from './CourtList.styles'
 
 interface Props {
   courts: Court[]
   selectedCourt: Court | null
   onSelect: (court: Court) => void
+  favorites: Court[]
+  isFavorite: (id: string) => boolean
+  onToggleFavorite: (court: Court) => void
 }
 
 // Google Maps "Universal" directions URL — opens turn-by-turn to the court in
@@ -29,63 +35,144 @@ const directionsUrl = (court: Court) =>
     court.name,
   )}&destination_place_id=${encodeURIComponent(court.id)}`
 
-const CourtList = ({ courts, selectedCourt, onSelect }: Props) => {
+const StarIcon = ({ filled }: { filled: boolean }) => (
+  <svg
+    width="17"
+    height="17"
+    viewBox="0 0 24 24"
+    fill={filled ? 'currentColor' : 'none'}
+    stroke="currentColor"
+    strokeWidth={filled ? 0 : 1.8}
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+  </svg>
+)
+
+type Tab = 'nearby' | 'saved'
+
+const CourtList = ({
+  courts,
+  selectedCourt,
+  onSelect,
+  favorites,
+  isFavorite,
+  onToggleFavorite,
+}: Props) => {
+  const [tab, setTab] = useState<Tab>('nearby')
   const itemRefs = useRef<(HTMLLIElement | null)[]>([])
 
   useEffect(() => {
-    if (!selectedCourt) return
+    if (tab !== 'nearby' || !selectedCourt) return
     const idx = courts.indexOf(selectedCourt)
     itemRefs.current[idx]?.scrollIntoView({
       block: 'nearest',
       behavior: 'smooth',
     })
-  }, [selectedCourt, courts])
+  }, [selectedCourt, courts, tab])
+
+  const star = (court: Court) => {
+    const active = isFavorite(court.id)
+    return (
+      <StarButton
+        type="button"
+        $active={active}
+        aria-label={active ? courtList.unsave : courtList.save}
+        aria-pressed={active}
+        onClick={(e) => {
+          e.stopPropagation()
+          onToggleFavorite(court)
+        }}
+      >
+        <StarIcon filled={active} />
+      </StarButton>
+    )
+  }
+
+  const details = (court: Court) => (
+    <Info>
+      <Name>{court.name}</Name>
+      <Address>{court.address}</Address>
+      {court.rating != null && (
+        <Rating>
+          ★ {court.rating}
+          {court.userRatingCount != null && (
+            <RatingCount> ({court.userRatingCount})</RatingCount>
+          )}
+        </Rating>
+      )}
+      {court.isOpen != null && (
+        <Hours $isOpen={court.isOpen}>
+          {court.isOpen ? courtList.openNow : courtList.closed}
+        </Hours>
+      )}
+      <DirectionsLink
+        href={directionsUrl(court)}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {courtList.directions}
+      </DirectionsLink>
+    </Info>
+  )
 
   return (
     <Sidebar>
-      <Header aria-live="polite">{courtList.heading(courts.length)}</Header>
-      <List>
-        {courts.map((court, i) => {
-          const selected = court === selectedCourt
-          return (
-            <Item
-              key={court.id ?? i}
-              ref={(el) => {
-                itemRefs.current[i] = el
-              }}
-              $selected={selected}
-              onClick={() => onSelect(court)}
-            >
-              <CourtNum $selected={selected}>{i + 1}</CourtNum>
-              <Info>
-                <Name>{court.name}</Name>
-                <Address>{court.address}</Address>
-                {court.rating != null && (
-                  <Rating>
-                    ★ {court.rating}
-                    {court.userRatingCount != null && (
-                      <RatingCount> ({court.userRatingCount})</RatingCount>
-                    )}
-                  </Rating>
-                )}
-                {court.isOpen != null && (
-                  <Hours $isOpen={court.isOpen}>
-                    {court.isOpen ? courtList.openNow : courtList.closed}
-                  </Hours>
-                )}
-                <DirectionsLink
-                  href={directionsUrl(court)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {courtList.directions}
-                </DirectionsLink>
-              </Info>
+      <Tabs role="tablist">
+        <TabButton
+          type="button"
+          role="tab"
+          aria-selected={tab === 'nearby'}
+          $active={tab === 'nearby'}
+          onClick={() => setTab('nearby')}
+        >
+          {courtList.nearbyTab} ({courts.length})
+        </TabButton>
+        <TabButton
+          type="button"
+          role="tab"
+          aria-selected={tab === 'saved'}
+          $active={tab === 'saved'}
+          onClick={() => setTab('saved')}
+        >
+          {courtList.savedTab} ({favorites.length})
+        </TabButton>
+      </Tabs>
+
+      {tab === 'nearby' ? (
+        <List aria-label={courtList.heading(courts.length)}>
+          {courts.map((court, i) => {
+            const selected = court === selectedCourt
+            return (
+              <Item
+                key={court.id ?? i}
+                ref={(el) => {
+                  itemRefs.current[i] = el
+                }}
+                $selected={selected}
+                onClick={() => onSelect(court)}
+              >
+                <CourtNum $selected={selected}>{i + 1}</CourtNum>
+                {details(court)}
+                {star(court)}
+              </Item>
+            )
+          })}
+        </List>
+      ) : favorites.length === 0 ? (
+        <EmptySaved>{courtList.emptySaved}</EmptySaved>
+      ) : (
+        <List aria-label={courtList.savedTab}>
+          {favorites.map((court) => (
+            <Item key={court.id} $selected={false}>
+              {details(court)}
+              {star(court)}
             </Item>
-          )
-        })}
-      </List>
+          ))}
+        </List>
+      )}
     </Sidebar>
   )
 }
