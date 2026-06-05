@@ -1,7 +1,7 @@
 import { notFound } from '../appData'
 import { Wrapper, Code, Message, HomeLink } from './NotFoundPage.styles'
 
-export default function NotFoundPage() {
+const NotFoundPage = () => {
   return (
     <Wrapper role="main">
       <Code>{notFound.code}</Code>
@@ -11,3 +11,5 @@ export default function NotFoundPage() {
     </Wrapper>
   )
 }
+
+export default NotFoundPage

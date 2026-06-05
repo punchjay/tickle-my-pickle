@@ -151,3 +151,5 @@ Default model for any Claude API integrations in this project: `claude-opus-4-8`
 Prettier config (`.prettierrc`): single quotes, no semicolons, trailing commas, 80-char print width, 2-space indent.
 
 ESLint uses the modern flat config (`eslint.config.js`) with `typescript-eslint`, `eslint-plugin-react-hooks`, and `eslint-plugin-react-refresh`. The `react-hooks/set-state-in-effect` rule is active — initialize state from a lazy initializer rather than calling `setState` synchronously inside `useEffect`.
+
+**Components are arrow functions.** Define React components as arrow-function consts with a trailing `export default Name` (`const Foo = (props: Props) => { … }` then `export default Foo`), not `function` declarations — this is the consistent style across the codebase, including inner sub-components (e.g. icon helpers) and test components like `Harness`. The sole exception is `ErrorBoundary`, which must stay a class (error boundaries require `componentDidCatch`/`getDerivedStateFromError`). Plain (non-component) helpers — including test utilities like `makePlace`/`installGoogle` — may keep `function` declarations where hoisting is convenient.
