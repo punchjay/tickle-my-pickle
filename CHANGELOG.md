@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.2.0...tickle-my-pickle-app-v1.3.0) (2026-06-05)
+
+
+### Features
+
+* save favorite courts (persisted locally) + amenities plan ([#60](https://github.com/punchjay/tickle-my-pickle/issues/60)) ([29042b3](https://github.com/punchjay/tickle-my-pickle/commit/29042b34bb715a5f1fea87ece7ec36a88b83c926))
+
 ## [1.2.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.1.0...tickle-my-pickle-app-v1.2.0) (2026-06-05)
 
 
