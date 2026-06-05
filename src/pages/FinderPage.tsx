@@ -31,7 +31,7 @@ const FinderPage = () => {
       <MapDiv ref={mapDivRef} $visible={courts.length > 0} />
       <OverlayTop $mapVisible={courts.length > 0}>
         <HeaderCard>
-          <Wordmark>{app.wordmark}</Wordmark>
+          <Wordmark $mapVisible={courts.length > 0}>{app.wordmark}</Wordmark>
           <Tagline>{app.tagline}</Tagline>
         </HeaderCard>
         <LocationInput

@@ -112,14 +112,17 @@ export const HeaderCard = styled.header`
   text-align: center;
 `
 
-export const Wordmark = styled.h1`
+export const Wordmark = styled.h1<{ $mapVisible: boolean }>`
   margin: 0;
   font-family: var(--pf-font-accent);
   font-weight: 600;
   font-size: 2.4rem;
   line-height: 1.1;
   letter-spacing: 0;
-  color: var(--pf-midnight);
+  /* Lighter court blue on the pre-search canvas, midnight once the map shows. */
+  color: ${({ $mapVisible }) =>
+    $mapVisible ? 'var(--pf-midnight)' : 'var(--pf-court-blue)'};
+  transition: color 0.4s ease;
 `
 
 export const Tagline = styled.p`
