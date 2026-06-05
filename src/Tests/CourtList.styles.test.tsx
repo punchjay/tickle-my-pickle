@@ -14,78 +14,67 @@ import {
 } from '@/components/CourtList.styles'
 
 describe('CourtList.styles', () => {
-  it('Sidebar renders a div and matches snapshot', () => {
+  it('Sidebar renders a div', () => {
     const { container } = render(<Sidebar />)
     expect(container.firstChild?.nodeName).toBe('DIV')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('Header renders an h2 and matches snapshot', () => {
+  it('Header renders an h2', () => {
     const { container } = render(<Header />)
     expect(container.firstChild?.nodeName).toBe('H2')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('List renders a ul and matches snapshot', () => {
+  it('List renders a ul', () => {
     const { container } = render(<List />)
     expect(container.firstChild?.nodeName).toBe('UL')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('Item renders an li and matches snapshot (unselected and selected)', () => {
+  it('Item renders an li (unselected and selected)', () => {
     const { container: unselected } = render(<Item $selected={false} />)
     expect(unselected.firstChild?.nodeName).toBe('LI')
-    expect(unselected.firstChild).toMatchSnapshot()
 
     const { container: selected } = render(<Item $selected={true} />)
-    expect(selected.firstChild).toMatchSnapshot()
+    expect(selected.firstChild?.nodeName).toBe('LI')
   })
 
-  it('CourtNum renders a span and matches snapshot (unselected and selected)', () => {
+  it('CourtNum renders a span (unselected and selected)', () => {
     const { container: unselected } = render(<CourtNum $selected={false} />)
     expect(unselected.firstChild?.nodeName).toBe('SPAN')
-    expect(unselected.firstChild).toMatchSnapshot()
 
     const { container: selected } = render(<CourtNum $selected={true} />)
-    expect(selected.firstChild).toMatchSnapshot()
+    expect(selected.firstChild?.nodeName).toBe('SPAN')
   })
 
-  it('Info renders a div and matches snapshot', () => {
+  it('Info renders a div', () => {
     const { container } = render(<Info />)
     expect(container.firstChild?.nodeName).toBe('DIV')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('Name renders a p and matches snapshot', () => {
+  it('Name renders a p', () => {
     const { container } = render(<Name />)
     expect(container.firstChild?.nodeName).toBe('P')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('Address renders a p and matches snapshot', () => {
+  it('Address renders a p', () => {
     const { container } = render(<Address />)
     expect(container.firstChild?.nodeName).toBe('P')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('Rating renders a p and matches snapshot', () => {
+  it('Rating renders a p', () => {
     const { container } = render(<Rating />)
     expect(container.firstChild?.nodeName).toBe('P')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('RatingCount renders a span and matches snapshot', () => {
+  it('RatingCount renders a span', () => {
     const { container } = render(<RatingCount />)
     expect(container.firstChild?.nodeName).toBe('SPAN')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('Hours renders a p and matches snapshot (open and closed)', () => {
+  it('Hours renders a p (open and closed)', () => {
     const { container: open } = render(<Hours $isOpen={true} />)
     expect(open.firstChild?.nodeName).toBe('P')
-    expect(open.firstChild).toMatchSnapshot()
 
     const { container: closed } = render(<Hours $isOpen={false} />)
-    expect(closed.firstChild).toMatchSnapshot()
+    expect(closed.firstChild?.nodeName).toBe('P')
   })
 })

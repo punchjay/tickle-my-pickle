@@ -9,7 +9,7 @@ export const app = {
 } as const
 
 export const search = {
-  placeholder: 'Search city, ZIP, or neighborhood',
+  placeholder: 'Search City, ZIP, or Hood',
   submitLabel: 'Search',
   inputLabel: 'Search location',
   nearMe: 'Near me',

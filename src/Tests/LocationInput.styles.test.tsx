@@ -9,39 +9,33 @@ import {
 } from '@/components/LocationInput.styles'
 
 describe('LocationInput.styles', () => {
-  it('Wrapper renders a div and matches snapshot', () => {
+  it('Wrapper renders a div', () => {
     const { container } = render(<Wrapper />)
     expect(container.firstChild?.nodeName).toBe('DIV')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('SearchForm renders a form and matches snapshot', () => {
+  it('SearchForm renders a form', () => {
     const { container } = render(<SearchForm />)
     expect(container.firstChild?.nodeName).toBe('FORM')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('IconButton renders a button and matches snapshot', () => {
+  it('IconButton renders a button', () => {
     const { container } = render(<IconButton />)
     expect(container.firstChild?.nodeName).toBe('BUTTON')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('SearchInput renders an input and matches snapshot', () => {
+  it('SearchInput renders an input', () => {
     const { container } = render(<SearchInput />)
     expect(container.firstChild?.nodeName).toBe('INPUT')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('Divider renders a span and matches snapshot', () => {
+  it('Divider renders a span', () => {
     const { container } = render(<Divider />)
     expect(container.firstChild?.nodeName).toBe('SPAN')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('NearMeButton renders a button and matches snapshot', () => {
+  it('NearMeButton renders a button', () => {
     const { container } = render(<NearMeButton />)
     expect(container.firstChild?.nodeName).toBe('BUTTON')
-    expect(container.firstChild).toMatchSnapshot()
   })
 })

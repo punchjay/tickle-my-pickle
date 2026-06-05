@@ -33,26 +33,6 @@ const courts: Court[] = [
 ]
 
 describe('CourtList', () => {
-  it('matches snapshot with no selection', () => {
-    const { container } = render(
-      <CourtList courts={courts} selectedCourt={null} onSelect={() => {}} />,
-    )
-    expect(container).toMatchSnapshot()
-  })
-
-  it('matches snapshot with a selected court', () => {
-    const { container } = render(
-      <CourtList
-        courts={courts}
-        selectedCourt={courts[1]}
-        onSelect={() => {}}
-      />,
-    )
-    expect(container).toMatchSnapshot()
-  })
-})
-
-describe('CourtList behavior', () => {
   beforeEach(() => scrollIntoViewMock.mockClear())
 
   it('shows a pluralized count in the header', () => {

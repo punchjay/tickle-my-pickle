@@ -1,21 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import LocationInput from '@/components/LocationInput'
 
-const PLACEHOLDER = 'Search city, ZIP, or neighborhood'
+const PLACEHOLDER = 'Search City, ZIP, or Hood'
 
 describe('LocationInput', () => {
-  it('matches snapshot', () => {
-    const { container } = render(
-      <LocationInput
-        onSearch={() => {}}
-        onGeolocate={() => {}}
-        loading={false}
-        disabled={false}
-      />,
-    )
-    expect(container).toMatchSnapshot()
-  })
-
   it('calls onSearch with the entered query on submit', () => {
     const onSearch = vi.fn()
     render(

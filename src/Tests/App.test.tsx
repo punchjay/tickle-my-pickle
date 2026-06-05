@@ -14,7 +14,7 @@ describe('App routing', () => {
   it('renders the finder page at /', () => {
     renderAt('/')
     expect(
-      screen.getByPlaceholderText('Search city, ZIP, or neighborhood'),
+      screen.getByPlaceholderText('Search City, ZIP, or Hood'),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('heading', { name: 'Tickle My Pickle' }),
