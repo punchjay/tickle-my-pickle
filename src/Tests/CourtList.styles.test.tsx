@@ -11,6 +11,7 @@ import {
   Rating,
   RatingCount,
   Hours,
+  DirectionsLink,
 } from '@/components/CourtList.styles'
 
 describe('CourtList.styles', () => {
@@ -76,5 +77,10 @@ describe('CourtList.styles', () => {
 
     const { container: closed } = render(<Hours $isOpen={false} />)
     expect(closed.firstChild?.nodeName).toBe('P')
+  })
+
+  it('DirectionsLink renders an a', () => {
+    const { container } = render(<DirectionsLink>Directions</DirectionsLink>)
+    expect(container.firstChild?.nodeName).toBe('A')
   })
 })

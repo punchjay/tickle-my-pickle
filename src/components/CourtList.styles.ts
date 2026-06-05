@@ -146,3 +146,18 @@ export const Hours = styled.p<HoursProps>`
   color: ${({ $isOpen }) =>
     $isOpen ? 'var(--pf-open)' : 'var(--pf-closed)'};
 `
+
+export const DirectionsLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--pf-link);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`

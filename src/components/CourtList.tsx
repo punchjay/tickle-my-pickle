@@ -13,6 +13,7 @@ import {
   Rating,
   RatingCount,
   Hours,
+  DirectionsLink,
 } from './CourtList.styles'
 
 interface Props {
@@ -20,6 +21,13 @@ interface Props {
   selectedCourt: Court | null
   onSelect: (court: Court) => void
 }
+
+// Google Maps "Universal" directions URL — opens turn-by-turn to the court in
+// a new tab. Pinning the place id keeps it exact even when names collide.
+const directionsUrl = (court: Court) =>
+  `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+    court.name,
+  )}&destination_place_id=${encodeURIComponent(court.id)}`
 
 const CourtList = ({ courts, selectedCourt, onSelect }: Props) => {
   const itemRefs = useRef<(HTMLLIElement | null)[]>([])
@@ -65,6 +73,14 @@ const CourtList = ({ courts, selectedCourt, onSelect }: Props) => {
                     {court.isOpen ? courtList.openNow : courtList.closed}
                   </Hours>
                 )}
+                <DirectionsLink
+                  href={directionsUrl(court)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {courtList.directions}
+                </DirectionsLink>
               </Info>
             </Item>
           )
