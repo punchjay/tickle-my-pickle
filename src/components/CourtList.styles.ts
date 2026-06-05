@@ -194,8 +194,9 @@ interface StarProps {
   $active: boolean
 }
 
-// Star toggle. Colors come straight from the theme: active is the marigold
-// ratings accent (filled), inactive is a muted caramel outline.
+// Star toggle. Colors come straight from the theme: active is the terracotta
+// primary (filled) — kept distinct from the marigold ratings accent — and
+// inactive is a muted caramel outline.
 export const StarButton = styled.button<StarProps>`
   flex-shrink: 0;
   display: flex;
@@ -209,13 +210,13 @@ export const StarButton = styled.button<StarProps>`
   background: transparent;
   cursor: pointer;
   color: ${({ $active }) =>
-    $active ? 'var(--pf-marigold)' : 'var(--pf-text-muted)'};
+    $active ? 'var(--pf-primary)' : 'var(--pf-text-muted)'};
   transition:
     color 0.12s,
     transform 0.12s;
 
   &:hover {
-    color: var(--pf-marigold);
+    color: var(--pf-primary);
     transform: scale(1.1);
   }
 `
