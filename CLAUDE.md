@@ -106,6 +106,8 @@ All component styles use **styled-components** (no CSS modules, no utility class
 
 **Each component/page keeps its styled-components in a sibling `*.styles.ts`** (`LocationInput.styles.ts`, `CourtList.styles.ts`, `ErrorBoundary.styles.ts`, `pages/FinderPage.styles.ts`, `pages/NotFoundPage.styles.ts`). The component file imports them by name. Prefer a token over a raw hex; a couple of genuine one-offs remain inline (the search pill's white background and placeholder color).
 
+**Text inputs must use `font-size: 1rem` (≥16px) or larger.** iOS Safari auto-zooms (and re-centers the viewport on) any focused form control whose font is under 16px — on the finder that zoom shoved the header card off the top of the screen when the keyboard opened. The base rem is 16px, so `1rem` is the floor; don't drop a focusable input below it. `SearchInput` in `LocationInput.styles.ts` carries an inline comment to this effect.
+
 ## TypeScript
 
 Strict mode with `noUnusedLocals`, `noUnusedParameters`, and `erasableSyntaxOnly` enforced. Two tsconfig files: `tsconfig.app.json` covers `src/`, `tsconfig.node.json` covers `vite.config.ts`. Both include `"google.maps"` in the `types` array so the `google.maps.*` global namespace is available without explicit imports.
