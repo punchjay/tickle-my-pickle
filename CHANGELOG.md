@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.1.0...tickle-my-pickle-app-v1.2.0) (2026-06-05)
+
+
+### Features
+
+* add directions links and emphasize the selected map pin ([#58](https://github.com/punchjay/tickle-my-pickle/issues/58)) ([da7bb18](https://github.com/punchjay/tickle-my-pickle/commit/da7bb1837546558d5b468d61176c2f5ad2022316))
+
 ## [1.1.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.0.0...tickle-my-pickle-app-v1.1.0) (2026-06-05)
 
 
