@@ -92,7 +92,7 @@ exports[`LocationInput.styles > SearchInput renders an input and matches snapsho
   border: none;
   background: transparent;
   padding: 8px 0;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-family: var(--pf-font-body);
   color: var(--pf-text);
   outline: none;
