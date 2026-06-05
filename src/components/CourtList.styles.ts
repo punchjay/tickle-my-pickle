@@ -1,4 +1,17 @@
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
+
+/* Entrance fade for the results panel; replays on each search because the
+   list is remounted via a per-search key. */
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+`
 
 export const Sidebar = styled.div`
   position: absolute;
@@ -14,6 +27,11 @@ export const Sidebar = styled.div`
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  animation: ${fadeIn} 0.4s ease both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 
   @media (max-width: 640px) {
     left: 0;

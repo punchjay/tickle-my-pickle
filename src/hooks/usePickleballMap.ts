@@ -27,6 +27,12 @@ export function usePickleballMap() {
 
   const [courts, setCourts] = useState<Court[]>([])
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null)
+  // Drives the map's opacity fade independently of `courts`: the map fades out
+  // while a (re-)search runs and fades back in once new results land.
+  const [mapShown, setMapShown] = useState(false)
+  // Bumped each time fresh results arrive, used as a React key to replay the
+  // results list's entrance fade on every search.
+  const [searchSeq, setSearchSeq] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(() =>
     !apiKey || apiKey === 'YOUR_KEY_HERE' ? errors.missingApiKey : null,
@@ -72,11 +78,12 @@ export function usePickleballMap() {
       if (!map) return
       setLoading(true)
       setError(null)
-      setCourts([])
       setSelectedCourt(null)
-      clearMarkers()
-      map.setCenter(location)
-      map.setZoom(12)
+      // Fade the map out while the new location loads. Previous results are
+      // intentionally kept until the new ones land, so the overlay (driven by
+      // courts.length) stays pinned to the top during a re-search instead of
+      // sliding back down to the canvas and up again.
+      setMapShown(false)
 
       try {
         const { Place } = google.maps.places
@@ -99,6 +106,8 @@ export function usePickleballMap() {
         })
 
         if (!places || places.length === 0) {
+          clearMarkers()
+          setCourts([])
           setLoading(false)
           setError(errors.noCourtsFound)
           return
@@ -121,7 +130,13 @@ export function usePickleballMap() {
           })),
         )
 
+        // Recenter and re-pin the map while it's still faded out, so the jump
+        // to the new location is hidden, then fade everything back in.
+        clearMarkers()
+        map.setCenter(location)
+        map.setZoom(12)
         setCourts(results)
+        setSearchSeq((n) => n + 1)
         const { AdvancedMarkerElement, PinElement } = google.maps.marker
         results.forEach((court, i) => {
           const pin = new PinElement({
@@ -140,8 +155,11 @@ export function usePickleballMap() {
           marker.addEventListener('gmp-click', () => setSelectedCourt(court))
           markersRef.current.push(marker)
         })
+        setMapShown(true)
       } catch (err) {
         console.error('Places searchByText failed:', err)
+        clearMarkers()
+        setCourts([])
         setError(errors.searchFailed)
       } finally {
         setLoading(false)
@@ -196,6 +214,8 @@ export function usePickleballMap() {
     mapDivRef,
     courts,
     selectedCourt,
+    mapShown,
+    searchSeq,
     loading,
     error,
     mapsReady,
