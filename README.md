@@ -25,6 +25,20 @@ cp .env.example .env.local
 > it to Maps JavaScript, Places, and Geocoding only. This prevents others from
 > lifting it from the bundle and burning your quota.
 
+> **Cap spending.** Maps APIs bill a card automatically past the monthly free
+> tier — Google does **not** warn you or stop on its own. Two opt-in safeguards:
+>
+> 1. **Daily quota caps (hard ceiling).** APIs & Services → each API → **Quotas**
+>    → set a low "requests per day" limit. Past it, requests **fail instead of
+>    billing** — the only thing that actually prevents charges (e.g. if a scraped
+>    key gets abused).
+> 2. **Budget alert (email warning).** Billing → **Budgets & alerts** → create a
+>    small budget (e.g. $1) with 50/90/100% thresholds. Emails you when crossed —
+>    informational only; it does **not** stop usage.
+>
+> A personal-scale deployment stays comfortably within the free tier, but the
+> daily cap guarantees a leaked key can't run up a bill.
+
 ### 3. Run it
 
 ```bash
