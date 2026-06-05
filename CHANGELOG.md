@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v0.3.0...tickle-my-pickle-app-v1.0.0) (2026-06-05)
+
+
+### Features
+
+* slowly animate the pre-search striped backdrop ([#41](https://github.com/punchjay/tickle-my-pickle/issues/41)) ([a7ed123](https://github.com/punchjay/tickle-my-pickle/commit/a7ed123c42e6cd5dc70902b256107610c398c8f3))
+* support Cloud-styled Map ID for a retro (non-default) map theme ([#39](https://github.com/punchjay/tickle-my-pickle/issues/39)) ([7ea2aeb](https://github.com/punchjay/tickle-my-pickle/commit/7ea2aebd66eada5562ad625b531e40b4b94c07ea))
+
+
+### Miscellaneous Chores
+
+* release as 1.0.0 ([#46](https://github.com/punchjay/tickle-my-pickle/issues/46)) ([3da6a57](https://github.com/punchjay/tickle-my-pickle/commit/3da6a576f2f978e611296b8f2bc0721dc15c0261))
+
 ## [0.3.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v0.2.0...tickle-my-pickle-app-v0.3.0) (2026-06-04)
 
 
