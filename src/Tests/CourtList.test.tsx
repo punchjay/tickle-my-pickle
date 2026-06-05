@@ -81,6 +81,23 @@ describe('CourtList', () => {
     expect(screen.getAllByText(/★/)).toHaveLength(2)
   })
 
+  it('renders a directions link per court without selecting on click', () => {
+    const onSelect = vi.fn()
+    render(
+      <CourtList courts={courts} selectedCourt={null} onSelect={onSelect} />,
+    )
+    const links = screen.getAllByRole('link', { name: 'Directions' })
+    expect(links).toHaveLength(3)
+    expect(links[0]).toHaveAttribute('target', '_blank')
+    expect(links[0]).toHaveAttribute('rel', 'noopener noreferrer')
+    expect(links[0].getAttribute('href')).toContain(
+      'destination_place_id=place_1',
+    )
+    // Clicking the link should not bubble up to select the row.
+    fireEvent.click(links[0])
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+
   it('shows open/closed status only when isOpen is defined', () => {
     render(
       <CourtList courts={courts} selectedCourt={null} onSelect={() => {}} />,

@@ -21,6 +21,7 @@ export const courtList = {
     `${count} pickleball ${count === 1 ? 'court' : 'courts'} nearby`,
   openNow: 'Open now',
   closed: 'Closed',
+  directions: 'Directions',
 } as const
 
 export const footer = {

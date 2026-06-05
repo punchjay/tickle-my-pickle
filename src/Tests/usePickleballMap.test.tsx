@@ -204,6 +204,17 @@ describe('usePickleballMap', () => {
     expect(hookApi.searchSeq).toBe(seqAfterFirst + 1)
   })
 
+  it('selects a court and pans the map on handleCourtSelect', async () => {
+    await renderReady()
+    await runSearch()
+    expect(hookApi.selectedCourt).toBeNull()
+
+    // Drives the marker-emphasis effect over the faked markers (must not throw)
+    // and surfaces the selection for the highlighted sidebar card.
+    act(() => hookApi.handleCourtSelect(hookApi.courts[0]))
+    expect(hookApi.selectedCourt).toBe(hookApi.courts[0])
+  })
+
   it('reports when no courts are found', async () => {
     searchByTextImpl = () => Promise.resolve({ places: [] })
     await renderReady()

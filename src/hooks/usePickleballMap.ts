@@ -20,6 +20,19 @@ if (apiKey && apiKey !== 'YOUR_KEY_HERE') {
   setOptions({ key: apiKey, v: 'weekly' })
 }
 
+// Numbered map pin. The selected court gets the dark "midnight" treatment at a
+// larger scale so it stands out from the terracotta crowd. Only called after
+// the marker library has loaded.
+function makePin(index: number, selected: boolean) {
+  return new google.maps.marker.PinElement({
+    glyphText: String(index + 1),
+    glyphColor: 'white',
+    background: selected ? palette.midnight : palette.terracotta,
+    borderColor: selected ? palette.midnight : palette.terracottaDark,
+    scale: selected ? 1.3 : 1,
+  })
+}
+
 export function usePickleballMap() {
   const mapDivRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<google.maps.Map | null>(null)
@@ -137,19 +150,13 @@ export function usePickleballMap() {
         map.setZoom(12)
         setCourts(results)
         setSearchSeq((n) => n + 1)
-        const { AdvancedMarkerElement, PinElement } = google.maps.marker
+        const { AdvancedMarkerElement } = google.maps.marker
         results.forEach((court, i) => {
-          const pin = new PinElement({
-            glyphText: String(i + 1),
-            glyphColor: 'white',
-            background: palette.terracotta,
-            borderColor: palette.terracottaDark,
-          })
           const marker = new AdvancedMarkerElement({
             map,
             position: court.location,
             title: court.name,
-            content: pin,
+            content: makePin(i, false),
             gmpClickable: true,
           })
           marker.addEventListener('gmp-click', () => setSelectedCourt(court))
@@ -167,6 +174,19 @@ export function usePickleballMap() {
     },
     [clearMarkers],
   )
+
+  // Re-skin the pins whenever the selection changes so the chosen court reads
+  // as "active" on the map, mirroring the highlighted card in the sidebar. The
+  // marker order matches `courts`, so index → court. Guarded on having markers
+  // (only true after a search, by which point the marker library has loaded).
+  useEffect(() => {
+    if (markersRef.current.length === 0) return
+    markersRef.current.forEach((marker, i) => {
+      const selected = courts[i] === selectedCourt
+      marker.content = makePin(i, selected)
+      marker.zIndex = selected ? 1 : null
+    })
+  }, [selectedCourt, courts])
 
   const handleSearch = useCallback(
     (query: string) => {
