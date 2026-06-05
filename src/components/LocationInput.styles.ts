@@ -46,7 +46,9 @@ export const SearchInput = styled.input`
   border: none;
   background: transparent;
   padding: 8px 0;
-  font-size: 0.9375rem;
+  /* Must stay >= 16px: iOS Safari auto-zooms (and re-centers, bumping the
+     header card off-screen) when a focused input's font is smaller. */
+  font-size: 1rem;
   font-family: var(--pf-font-body);
   color: var(--pf-text);
   outline: none;
