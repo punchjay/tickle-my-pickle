@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="48" fill="#16a34a"/>
-  <text x="50" y="67" font-size="60" text-anchor="middle" font-family="system-ui, sans-serif">🥒</text>
+  <!-- Palette: terracotta fill + terracottaDark border, mirroring the map pins
+       (see theme.ts / PinElement in usePickleballMap.ts). -->
+  <circle cx="50" cy="50" r="46" fill="#E07C53" stroke="#C4633D" stroke-width="4"/>
+  <text x="50" y="68" font-size="58" text-anchor="middle" font-family="system-ui, sans-serif">🥒</text>
 </svg>
