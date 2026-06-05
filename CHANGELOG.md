@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.3.0...tickle-my-pickle-app-v1.3.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* tint favicon with the app palette ([#64](https://github.com/punchjay/tickle-my-pickle/issues/64)) ([4d96758](https://github.com/punchjay/tickle-my-pickle/commit/4d96758a87af56b7e4c2771b3769a0d2846bfb30))
+* use terracotta (primary) for the saved-court star ([#62](https://github.com/punchjay/tickle-my-pickle/issues/62)) ([fbd35ca](https://github.com/punchjay/tickle-my-pickle/commit/fbd35cad2efb1f83089bf41f1b71f0226eae01fe))
+
 ## [1.3.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.2.0...tickle-my-pickle-app-v1.3.0) (2026-06-05)
 
 
