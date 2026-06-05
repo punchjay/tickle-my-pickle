@@ -40,3 +40,6 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Claude Code local runtime artifacts
+.claude/scheduled_tasks.lock

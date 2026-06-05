@@ -1,0 +1,117 @@
+# Amenities tagging — design plan (not yet implemented)
+
+Status: **planning only.** This documents how we'd add indoor/outdoor and
+amenity information to court results, the data limitations that make it hard,
+and a phased path that avoids regressing the numbered-pin ↔ list correspondence.
+
+## Goal
+
+Let users tell apart **indoor vs. outdoor** courts, and ideally surface a few
+amenities (lights, public/free, dedicated vs. shared lines, restrooms). The
+headline ask is filtering ("show me indoor courts"), but the data quality
+forces us to start with **labels, not filters**.
+
+## The core problem: the data isn't there
+
+We use the **Places API (New)** `Place.searchByText` ("pickleball court" with a
+`locationBias`) and map results into the local `Court` view-model
+(`src/types.ts`). The fields we request (`displayName`, `formattedAddress`,
+`location`, `rating`, `userRatingCount`, `regularOpeningHours`,
+`utcOffsetMinutes`) contain **no reliable indoor/outdoor or amenity signal**:
+
+- There is no structured "indoor", "outdoor", "lighted", or "free" attribute on
+  a `Place` for this category.
+- `types` is coarse (e.g. `park`, `gym`, `sports_complex`, `point_of_interest`)
+  and frequently generic; it does not map cleanly to indoor/outdoor.
+- The richest hints live in **unstructured text** — the place name, and (only if
+  we fetch more, at higher billing tiers) editorial summaries / reviews.
+
+So any tag we show is an **inference**, and inferences will sometimes be wrong.
+That truth shapes the whole rollout: be honest, start non-committal, never let a
+guess silently filter results out.
+
+## Approach: heuristic tagging from name + types
+
+A pure-client, zero-extra-API heuristic over data we already have:
+
+```
+indoor   ← name/types match: "indoor", "fieldhouse", "rec center",
+            "recreation center", "ymca", "athletic club", "sportsplex",
+            "gym", "arena", "club" (weak)
+outdoor  ← name/types match: "park", "outdoor", "tennis center" (weak),
+            "courts" at a park-typed place
+lighted  ← name matches "lighted" / "lights"
+free     ← typed as `park` AND not a private "club"/"academy"
+```
+
+- Implement as a pure function `inferAmenities(court): Tag[]` with an explicit
+  confidence per tag (`high | low`). Keep the keyword tables in one place so
+  they're tunable and testable.
+- Conflicts (matches both indoor and outdoor) → resolve to the higher-confidence
+  match, else show neither rather than guessing.
+- This is cheap, deterministic, and unit-testable with fixture names.
+
+### Optional later upgrade (costs more)
+
+If heuristics prove too weak, fetch richer per-place fields
+(`editorialSummary`, `reviews`) — but those bump the Places SKU tier and the
+per-request cost, which fights the project's billing safeguards
+(see `CLAUDE.md` → "Billing & quota safeguards"). Gate behind a deliberate
+decision and the daily quota caps; do **not** fetch them for every result by
+default.
+
+## UI rollout — labels first, filter last
+
+### Phase 1 — badges only (no filtering)
+
+- Render small amenity **badges** on each `CourtList` card (reuse the theme:
+  e.g. court-blue for "Indoor", lime/`--pf-open` for "Outdoor"/"Free",
+  sunshine for "Lighted"). Only show `high`-confidence tags by default.
+- **No filtering, no reordering** → the numbered pins stay perfectly aligned
+  with the list (this is the constraint that made full filter/sort a "medium",
+  not a quick win). Zero blast radius on the map.
+- Add a one-line, honest disclaimer ("based on the listing name") or a tooltip,
+  since tags are inferred.
+
+### Phase 2 — filtering, done correctly
+
+Filtering hides/reorders cards, which **desyncs the numbered map pins** from the
+list unless the map is re-pinned to match. The correct fix is architectural:
+
+1. Introduce a single `displayedCourts` array that is the source of truth for
+   **both** the sidebar list and the map markers.
+2. Move marker creation out of `searchNearby` into an effect keyed on
+   `displayedCourts` (clear + re-pin + renumber) — markers become a pure
+   function of what's displayed, so any filter/sort can't desync them.
+3. Layer the amenity filter (and, for free, distance/rating sort and the
+   "open now" filter) on top of that array.
+
+This refactor also unlocks the previously-deferred **open-now filter** and
+**sort** controls, which have the same desync root cause. Treat Phase 2 as "make
+filtering safe for the whole sidebar," not just amenities.
+
+## Testing
+
+- Unit-test `inferAmenities` against a fixture table of real-ish place names
+  (true/false expectations per tag), including the conflict and
+  low-confidence cases.
+- Phase 1: badge render tests (tag → badge, low-confidence hidden).
+- Phase 2: a test asserting list order and pin numbering stay in lockstep under
+  a filter (the regression this whole plan is organized to prevent).
+
+## Risks / honest caveats
+
+- **Wrong labels erode trust.** Mislabeling an outdoor park as indoor is worse
+  than no label. Default to high-confidence only; make tags visibly "best
+  guess."
+- **Filtering can hide real results.** A user filtering "indoor" could lose a
+  court we simply failed to tag. Consider an "includes untagged" escape or keep
+  filtering opt-in with a clear count of hidden results.
+- **Billing.** Richer fields cost more; keep within the daily quota caps.
+
+## Recommendation
+
+Ship **Phase 1 (badges, high-confidence only)** as the next increment — it's
+cheap, safe, and immediately useful — and schedule the `displayedCourts`
+refactor (Phase 2) as the unlock for amenities filtering **and** the deferred
+open-now/sort controls together.

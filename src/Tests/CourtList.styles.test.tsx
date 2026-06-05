@@ -2,6 +2,8 @@ import { render } from '@testing-library/react'
 import {
   Sidebar,
   Header,
+  Tabs,
+  TabButton,
   List,
   Item,
   CourtNum,
@@ -12,6 +14,8 @@ import {
   RatingCount,
   Hours,
   DirectionsLink,
+  StarButton,
+  EmptySaved,
 } from '@/components/CourtList.styles'
 
 describe('CourtList.styles', () => {
@@ -23,6 +27,19 @@ describe('CourtList.styles', () => {
   it('Header renders an h2', () => {
     const { container } = render(<Header />)
     expect(container.firstChild?.nodeName).toBe('H2')
+  })
+
+  it('Tabs renders a div', () => {
+    const { container } = render(<Tabs />)
+    expect(container.firstChild?.nodeName).toBe('DIV')
+  })
+
+  it('TabButton renders a button (active and inactive)', () => {
+    const { container: active } = render(<TabButton $active={true} />)
+    expect(active.firstChild?.nodeName).toBe('BUTTON')
+
+    const { container: inactive } = render(<TabButton $active={false} />)
+    expect(inactive.firstChild?.nodeName).toBe('BUTTON')
   })
 
   it('List renders a ul', () => {
@@ -82,5 +99,18 @@ describe('CourtList.styles', () => {
   it('DirectionsLink renders an a', () => {
     const { container } = render(<DirectionsLink>Directions</DirectionsLink>)
     expect(container.firstChild?.nodeName).toBe('A')
+  })
+
+  it('StarButton renders a button (active and inactive)', () => {
+    const { container: active } = render(<StarButton $active={true} />)
+    expect(active.firstChild?.nodeName).toBe('BUTTON')
+
+    const { container: inactive } = render(<StarButton $active={false} />)
+    expect(inactive.firstChild?.nodeName).toBe('BUTTON')
+  })
+
+  it('EmptySaved renders a p', () => {
+    const { container } = render(<EmptySaved />)
+    expect(container.firstChild?.nodeName).toBe('P')
   })
 })

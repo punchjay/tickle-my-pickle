@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import CourtList from '@/components/CourtList'
 import type { Court } from '@/types'
@@ -32,60 +33,72 @@ const courts: Court[] = [
   },
 ]
 
+// Renders CourtList with sensible favorites defaults; individual tests override.
+const renderList = (props: Partial<ComponentProps<typeof CourtList>> = {}) =>
+  render(
+    <CourtList
+      courts={courts}
+      selectedCourt={null}
+      onSelect={() => {}}
+      favorites={[]}
+      isFavorite={() => false}
+      onToggleFavorite={() => {}}
+      {...props}
+    />,
+  )
+
 describe('CourtList', () => {
   beforeEach(() => scrollIntoViewMock.mockClear())
 
-  it('shows a pluralized count in the header', () => {
-    const { rerender } = render(
-      <CourtList courts={courts} selectedCourt={null} onSelect={() => {}} />,
-    )
-    expect(screen.getByText(/3 pickleball courts nearby/)).toBeInTheDocument()
-
-    rerender(
-      <CourtList courts={[courts[0]]} selectedCourt={null} onSelect={() => {}} />,
-    )
-    expect(screen.getByText(/1 pickleball court nearby/)).toBeInTheDocument()
-
-    rerender(<CourtList courts={[]} selectedCourt={null} onSelect={() => {}} />)
-    expect(screen.getByText(/0 pickleball courts nearby/)).toBeInTheDocument()
+  it('shows tab labels with nearby and saved counts', () => {
+    renderList({ favorites: [courts[0]] })
+    expect(screen.getByRole('tab', { name: /Nearby \(3\)/ })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /Saved \(1\)/ })).toBeInTheDocument()
   })
 
   it('calls onSelect with the clicked court', () => {
     const onSelect = vi.fn()
-    render(
-      <CourtList courts={courts} selectedCourt={null} onSelect={onSelect} />,
-    )
+    renderList({ onSelect })
     fireEvent.click(screen.getByText('Riverside Courts'))
     expect(onSelect).toHaveBeenCalledWith(courts[1])
   })
 
   it('scrolls the selected court into view when selection changes', () => {
-    const { rerender } = render(
-      <CourtList courts={courts} selectedCourt={null} onSelect={() => {}} />,
-    )
+    const { rerender } = renderList()
     expect(scrollIntoViewMock).not.toHaveBeenCalled()
 
     rerender(
-      <CourtList courts={courts} selectedCourt={courts[2]} onSelect={() => {}} />,
+      <CourtList
+        courts={courts}
+        selectedCourt={courts[2]}
+        onSelect={() => {}}
+        favorites={[]}
+        isFavorite={() => false}
+        onToggleFavorite={() => {}}
+      />,
     )
     expect(scrollIntoViewMock).toHaveBeenCalled()
   })
 
   it('renders rating only for courts that have one', () => {
-    render(
-      <CourtList courts={courts} selectedCourt={null} onSelect={() => {}} />,
-    )
+    renderList()
     expect(screen.getByText(/4\.5/)).toBeInTheDocument()
     expect(screen.getByText(/\(127\)/)).toBeInTheDocument()
     // courts[0] and courts[1] have ratings; courts[2] does not.
     expect(screen.getAllByText(/★/)).toHaveLength(2)
   })
 
+  it('shows open/closed status only when isOpen is defined', () => {
+    renderList()
+    expect(screen.getByText('Open now')).toBeInTheDocument() // courts[0]
+    expect(screen.getByText('Closed')).toBeInTheDocument() // courts[1]
+    // courts[2] has no isOpen, so only two status labels render.
+    expect(screen.getAllByText(/Open now|Closed/)).toHaveLength(2)
+  })
+
   it('renders a directions link per court without selecting on click', () => {
     const onSelect = vi.fn()
-    render(
-      <CourtList courts={courts} selectedCourt={null} onSelect={onSelect} />,
-    )
+    renderList({ onSelect })
     const links = screen.getAllByRole('link', { name: 'Directions' })
     expect(links).toHaveLength(3)
     expect(links[0]).toHaveAttribute('target', '_blank')
@@ -98,13 +111,42 @@ describe('CourtList', () => {
     expect(onSelect).not.toHaveBeenCalled()
   })
 
-  it('shows open/closed status only when isOpen is defined', () => {
-    render(
-      <CourtList courts={courts} selectedCourt={null} onSelect={() => {}} />,
-    )
-    expect(screen.getByText('Open now')).toBeInTheDocument() // courts[0]
-    expect(screen.getByText('Closed')).toBeInTheDocument() // courts[1]
-    // courts[2] has no isOpen, so only two status labels render.
-    expect(screen.getAllByText(/Open now|Closed/)).toHaveLength(2)
+  it('toggles a favorite without selecting the row', () => {
+    const onSelect = vi.fn()
+    const onToggleFavorite = vi.fn()
+    renderList({ onSelect, onToggleFavorite })
+    const stars = screen.getAllByRole('button', { name: 'Save court' })
+    expect(stars).toHaveLength(3)
+    fireEvent.click(stars[0])
+    expect(onToggleFavorite).toHaveBeenCalledWith(courts[0])
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+
+  it('reflects favorite state on the star (aria-pressed + label)', () => {
+    renderList({ isFavorite: (id) => id === 'place_2' })
+    // Only the favorited court shows the "remove" affordance.
+    const remove = screen.getByRole('button', { name: 'Remove from saved' })
+    expect(remove).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getAllByRole('button', { name: 'Save court' })).toHaveLength(2)
+  })
+
+  it('shows saved courts under the Saved tab', () => {
+    renderList({
+      favorites: [courts[0]],
+      isFavorite: (id) => id === 'place_1',
+    })
+    fireEvent.click(screen.getByRole('tab', { name: /Saved/ }))
+    expect(screen.getByText('City Pickleball Club')).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Remove from saved' }),
+    ).toBeInTheDocument()
+    // Riverside is a nearby result but not saved, so it's hidden here.
+    expect(screen.queryByText('Riverside Courts')).not.toBeInTheDocument()
+  })
+
+  it('shows an empty state under Saved when there are no favorites', () => {
+    renderList()
+    fireEvent.click(screen.getByRole('tab', { name: /Saved/ }))
+    expect(screen.getByText(/No saved courts yet/)).toBeInTheDocument()
   })
 })
