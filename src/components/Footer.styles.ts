@@ -1,4 +1,15 @@
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
+
+// Soft entrance shared with the backdrop + cards on FinderPage; the footer is
+// last in the cascade (longest delay).
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`
 
 // Floating credit pill, bottom-center, in the same "card over the canvas"
 // language as the header card and search pill. Shown on the pre-search canvas
@@ -8,6 +19,7 @@ export const Wrapper = styled.footer`
   left: 50%;
   bottom: 16px;
   transform: translateX(-50%);
+  animation: ${fadeIn} 0.9s ease 0.25s both;
   z-index: 10;
   display: inline-flex;
   align-items: center;
@@ -21,6 +33,10 @@ export const Wrapper = styled.footer`
   font-size: 0.8125rem;
   color: var(--pf-text-muted);
   white-space: nowrap;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `
 
 export const FooterLink = styled.a`

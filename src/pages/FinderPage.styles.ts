@@ -13,6 +13,18 @@ const stripeSlide = keyframes`
   }
 `
 
+/* Gentle entrance: the striped backdrop and the cards fade up on first paint
+   rather than popping in. Staggered via per-element animation-delay (stripes →
+   cards → footer) for a soft cascade. */
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`
+
 export const AppWrapper = styled.div<{ $mapVisible: boolean }>`
   position: relative;
   width: 100vw;
@@ -42,7 +54,9 @@ export const AppWrapper = styled.div<{ $mapVisible: boolean }>`
         var(--pf-midnight) 108px 144px,
         var(--pf-ivory) 144px 180px
       );
-    animation: ${stripeSlide} 12s linear infinite;
+    animation:
+      ${fadeIn} 0.9s ease both,
+      ${stripeSlide} 12s linear infinite;
     display: ${({ $mapVisible }) => ($mapVisible ? 'none' : 'block')};
     will-change: transform;
   }
@@ -75,12 +89,18 @@ export const OverlayTop = styled.div<{ $mapVisible: boolean }>`
   transition:
     top 0.5s ease,
     transform 0.5s ease;
+  /* Fade the header card + search pill in just after the backdrop. */
+  animation: ${fadeIn} 0.9s ease 0.15s both;
   z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 8px;
   width: min(400px, calc(100vw - 32px));
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `
 
 export const HeaderCard = styled.header`
