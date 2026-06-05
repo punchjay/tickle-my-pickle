@@ -21,7 +21,7 @@ interface Props {
   onSelect: (court: Court) => void
 }
 
-export default function CourtList({ courts, selectedCourt, onSelect }: Props) {
+const CourtList = ({ courts, selectedCourt, onSelect }: Props) => {
   const itemRefs = useRef<(HTMLLIElement | null)[]>([])
 
   useEffect(() => {
@@ -73,3 +73,5 @@ export default function CourtList({ courts, selectedCourt, onSelect }: Props) {
     </Sidebar>
   )
 }
+
+export default CourtList

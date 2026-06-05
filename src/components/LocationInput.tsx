@@ -10,7 +10,7 @@ import {
   NearMeButton,
 } from './LocationInput.styles'
 
-function SearchIcon() {
+const SearchIcon = () => {
   return (
     <svg
       width="18"
@@ -33,7 +33,7 @@ function SearchIcon() {
   )
 }
 
-function NearMeIcon() {
+const NearMeIcon = () => {
   return (
     <svg
       width="15"
@@ -61,17 +61,17 @@ interface Props {
   initializing?: boolean
 }
 
-export default function LocationInput({
+const LocationInput = ({
   onSearch,
   onGeolocate,
   loading,
   disabled,
   initializing = false,
-}: Props) {
+}: Props) => {
   const [query, setQuery] = useState('')
   const busy = loading || initializing
 
-  function handleSubmit(e: FormEvent) {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     const trimmed = query.trim()
     if (trimmed) onSearch(trimmed)
@@ -108,3 +108,5 @@ export default function LocationInput({
     </Wrapper>
   )
 }
+
+export default LocationInput

@@ -85,7 +85,7 @@ type HookApi = ReturnType<
 let hookApi!: HookApi
 let useHook!: (typeof import('@/hooks/usePickleballMap'))['usePickleballMap']
 
-function Harness() {
+const Harness = () => {
   const api = useHook()
   const { mapDivRef } = api
   // Capture the latest hook return in an effect (not during render) so tests

@@ -13,7 +13,7 @@ import {
   ErrorBanner,
 } from './FinderPage.styles'
 
-function FinderPage() {
+const FinderPage = () => {
   const {
     mapDivRef,
     courts,

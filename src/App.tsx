@@ -7,7 +7,7 @@ import RouteFallback from './components/Spinner'
 // code-split behind <Suspense> with the shared spinner as the fallback.
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
-export default function App() {
+const App = () => {
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>
@@ -17,3 +17,5 @@ export default function App() {
     </Suspense>
   )
 }
+
+export default App
