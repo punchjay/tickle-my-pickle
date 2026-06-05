@@ -239,7 +239,7 @@ exports[`FinderPage.styles > OverlayTop slides to the top once the map is visibl
 exports[`FinderPage.styles > Tagline renders a p and matches snapshot 1`] = `
 .c0 {
   margin: 2px 0 0;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--pf-text-muted);
 }

@@ -124,7 +124,7 @@ export const Wordmark = styled.h1`
 
 export const Tagline = styled.p`
   margin: 2px 0 0;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--pf-text-muted);
 `
