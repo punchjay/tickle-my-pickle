@@ -1,6 +1,6 @@
 # Tickle My Pickle
 
-Find pickleball courts near you. Enter a zip code or use your device's location — the app drops numbered markers on a Google Map and lists nearby courts with ratings and hours.
+Find pickleball courts near you. Enter a free-text location (city, ZIP, or neighborhood) or use your device's location — the app drops numbered markers on a Google Map and lists nearby courts with ratings and hours.
 
 ## Setup
 
@@ -36,14 +36,17 @@ App runs at `http://localhost:5173`.
 
 ## Stack
 
-React 19 · TypeScript 6 · Vite 8 · styled-components v6 · Google Maps JS API
+React 19 · TypeScript 6 · Vite 8 · styled-components v6 · React Router v7 · Google Maps JS API
 
 ## Commands
 
 ```bash
-npm run dev        # dev server
-npm run build      # type-check + production build
-npm test           # run tests
+npm run dev        # dev server (localhost:5173)
+npm run build      # type-check + production build → dist/
+npm run preview    # preview the production build (localhost:4173)
+npm run typecheck  # tsc over src/ and src/Tests/ (no emit)
 npm run lint       # ESLint
 npm run format     # Prettier
+npm test           # run tests once
+npm run test:watch # tests in watch mode
 ```
