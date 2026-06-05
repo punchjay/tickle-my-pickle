@@ -45,10 +45,17 @@ describe('FinderPage.styles', () => {
     expect(container.firstChild?.nodeName).toBe('HEADER')
   })
 
-  it('Wordmark renders an h1', () => {
-    const { container } = render(<Wordmark>Tickle My Pickle</Wordmark>)
-    expect(container.firstChild?.nodeName).toBe('H1')
-    expect(container.firstChild).toHaveTextContent('Tickle My Pickle')
+  it('Wordmark renders an h1 (pre-search and map states)', () => {
+    const { container: preSearch } = render(
+      <Wordmark $mapVisible={false}>Tickle My Pickle</Wordmark>,
+    )
+    expect(preSearch.firstChild?.nodeName).toBe('H1')
+    expect(preSearch.firstChild).toHaveTextContent('Tickle My Pickle')
+
+    const { container: mapVisible } = render(
+      <Wordmark $mapVisible={true}>Tickle My Pickle</Wordmark>,
+    )
+    expect(mapVisible.firstChild?.nodeName).toBe('H1')
   })
 
   it('Tagline renders a p', () => {
