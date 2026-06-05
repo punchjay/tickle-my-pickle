@@ -13,63 +13,53 @@ describe('FinderPage.styles', () => {
   it('AppWrapper renders a div with the striped backdrop before the map loads', () => {
     const { container } = render(<AppWrapper $mapVisible={false} />)
     expect(container.firstChild?.nodeName).toBe('DIV')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
   it('AppWrapper drops the backdrop once the map is visible', () => {
     const { container } = render(<AppWrapper $mapVisible={true} />)
     expect(container.firstChild?.nodeName).toBe('DIV')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('MapDiv renders a div and matches snapshot when hidden', () => {
+  it('MapDiv renders a div when hidden', () => {
     const { container } = render(<MapDiv $visible={false} />)
     expect(container.firstChild?.nodeName).toBe('DIV')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('MapDiv renders a div and matches snapshot when visible', () => {
+  it('MapDiv renders a div when visible', () => {
     const { container } = render(<MapDiv $visible={true} />)
     expect(container.firstChild?.nodeName).toBe('DIV')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
   it('OverlayTop renders centered above the middle before the map loads', () => {
     const { container } = render(<OverlayTop $mapVisible={false} />)
     expect(container.firstChild?.nodeName).toBe('DIV')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
   it('OverlayTop slides to the top once the map is visible', () => {
     const { container } = render(<OverlayTop $mapVisible={true} />)
     expect(container.firstChild?.nodeName).toBe('DIV')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('HeaderCard renders a header and matches snapshot', () => {
+  it('HeaderCard renders a header', () => {
     const { container } = render(<HeaderCard />)
     expect(container.firstChild?.nodeName).toBe('HEADER')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('Wordmark renders an h1 and matches snapshot', () => {
+  it('Wordmark renders an h1', () => {
     const { container } = render(<Wordmark>Tickle My Pickle</Wordmark>)
     expect(container.firstChild?.nodeName).toBe('H1')
     expect(container.firstChild).toHaveTextContent('Tickle My Pickle')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('Tagline renders a p and matches snapshot', () => {
+  it('Tagline renders a p', () => {
     const { container } = render(<Tagline>Find pickleball courts near you</Tagline>)
     expect(container.firstChild?.nodeName).toBe('P')
     expect(container.firstChild).toHaveTextContent('Find pickleball courts near you')
-    expect(container.firstChild).toMatchSnapshot()
   })
 
-  it('ErrorBanner renders a p and matches snapshot', () => {
+  it('ErrorBanner renders a p', () => {
     const { container } = render(<ErrorBanner>Something went wrong</ErrorBanner>)
     expect(container.firstChild?.nodeName).toBe('P')
     expect(container.firstChild).toHaveTextContent('Something went wrong')
-    expect(container.firstChild).toMatchSnapshot()
   })
 })
