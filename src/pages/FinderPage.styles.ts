@@ -103,6 +103,8 @@ export const OverlayTop = styled.div<{ $mapVisible: boolean }>`
   }
 `
 
+// The header is the pre-search hero only — it unmounts once the map loads
+// (results mode reclaims the vertical space), so it has a single fixed size.
 export const HeaderCard = styled.header`
   background: var(--pf-card);
   border: 1px solid var(--pf-border-soft);
@@ -112,17 +114,14 @@ export const HeaderCard = styled.header`
   text-align: center;
 `
 
-export const Wordmark = styled.h1<{ $mapVisible: boolean }>`
+export const Wordmark = styled.h1`
   margin: 0;
   font-family: var(--pf-font-accent);
   font-weight: 600;
   font-size: 2.4rem;
   line-height: 1.1;
   letter-spacing: 0;
-  /* Lighter court blue on the pre-search canvas, midnight once the map shows. */
-  color: ${({ $mapVisible }) =>
-    $mapVisible ? 'var(--pf-midnight)' : 'var(--pf-court-blue)'};
-  transition: color 0.4s ease;
+  color: var(--pf-court-blue);
 `
 
 export const Tagline = styled.p`
@@ -130,6 +129,20 @@ export const Tagline = styled.p`
   font-size: 1rem;
   font-weight: 500;
   color: var(--pf-text-muted);
+`
+
+// Keeps an accessible page <h1> in results mode, where the visible hero header
+// is unmounted. Standard screen-reader-only clip pattern.
+export const VisuallyHiddenTitle = styled.h1`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 `
 
 export const ErrorBanner = styled.p`

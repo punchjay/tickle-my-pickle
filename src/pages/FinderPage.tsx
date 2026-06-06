@@ -11,6 +11,7 @@ import {
   HeaderCard,
   Wordmark,
   Tagline,
+  VisuallyHiddenTitle,
   ErrorBanner,
 } from './FinderPage.styles'
 
@@ -34,10 +35,14 @@ const FinderPage = () => {
     <AppWrapper $mapVisible={courts.length > 0}>
       <MapDiv ref={mapDivRef} $visible={mapShown} />
       <OverlayTop $mapVisible={courts.length > 0}>
-        <HeaderCard>
-          <Wordmark $mapVisible={courts.length > 0}>{app.wordmark}</Wordmark>
-          <Tagline>{app.tagline}</Tagline>
-        </HeaderCard>
+        {courts.length === 0 ? (
+          <HeaderCard>
+            <Wordmark>{app.wordmark}</Wordmark>
+            <Tagline>{app.tagline}</Tagline>
+          </HeaderCard>
+        ) : (
+          <VisuallyHiddenTitle>{app.wordmark}</VisuallyHiddenTitle>
+        )}
         <LocationInput
           onSearch={handleSearch}
           onGeolocate={handleGeolocate}
