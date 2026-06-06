@@ -52,7 +52,9 @@ describe('CourtList', () => {
 
   it('shows tab labels with nearby and saved counts', () => {
     renderList({ favorites: [courts[0]] })
-    expect(screen.getByRole('tab', { name: /Nearby \(3\)/ })).toBeInTheDocument()
+    expect(
+      screen.getByRole('tab', { name: /Nearby \(3\)/ }),
+    ).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: /Saved \(1\)/ })).toBeInTheDocument()
   })
 
@@ -127,7 +129,9 @@ describe('CourtList', () => {
     // Only the favorited court shows the "remove" affordance.
     const remove = screen.getByRole('button', { name: 'Remove from saved' })
     expect(remove).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getAllByRole('button', { name: 'Save court' })).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: 'Save court' })).toHaveLength(
+      2,
+    )
   })
 
   it('shows saved courts under the Saved tab', () => {
@@ -148,5 +152,38 @@ describe('CourtList', () => {
     renderList()
     fireEvent.click(screen.getByRole('tab', { name: /Saved/ }))
     expect(screen.getByText(/No saved courts yet/)).toBeInTheDocument()
+  })
+
+  it('renders high-confidence amenity badges only', () => {
+    const tagged: Court[] = [
+      // park-typed → Outdoor + Free (both high).
+      {
+        id: 'p1',
+        name: 'Lincoln Park',
+        address: '1 Park Rd',
+        types: ['park'],
+        location: { lat: 0, lng: 0 },
+      },
+      // "rec center" → Indoor (high).
+      {
+        id: 'p2',
+        name: 'Community Rec Center',
+        address: '2 Rec Ave',
+        location: { lat: 0, lng: 0 },
+      },
+      // "club" is only a low-confidence indoor hint → no badge in Phase 1.
+      {
+        id: 'p3',
+        name: 'The Pickle Club',
+        address: '3 Dink Ln',
+        location: { lat: 0, lng: 0 },
+      },
+    ]
+    renderList({ courts: tagged })
+    expect(screen.getByText('Outdoor')).toBeInTheDocument()
+    expect(screen.getByText('Free')).toBeInTheDocument()
+    expect(screen.getByText('Indoor')).toBeInTheDocument()
+    // The low-confidence club hint shows nothing.
+    expect(screen.queryByText('Lighted')).not.toBeInTheDocument()
   })
 })

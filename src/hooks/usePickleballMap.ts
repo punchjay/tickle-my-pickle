@@ -11,7 +11,8 @@ const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
 // for the style to import in the Google Cloud console. Falls back to Google's
 // DEMO_MAP_ID (default styling) when unset, so dev works without one.
 const MAP_ID =
-  (import.meta.env.VITE_GOOGLE_MAPS_MAP_ID as string | undefined) || 'DEMO_MAP_ID'
+  (import.meta.env.VITE_GOOGLE_MAPS_MAP_ID as string | undefined) ||
+  'DEMO_MAP_ID'
 const SEARCH_RADIUS_METERS = 16093 // ~10 miles
 
 // Configure the loader once at module load. Calling setOptions() more than
@@ -109,6 +110,8 @@ export function usePickleballMap() {
             'location',
             'rating',
             'userRatingCount',
+            // Coarse category labels — input to the amenity heuristic.
+            'types',
             'regularOpeningHours',
             // isOpen() needs utcOffsetMinutes; without it the SDK fires a
             // secondary fetch that can throw and reject the whole search.
@@ -133,6 +136,7 @@ export function usePickleballMap() {
             address: place.formattedAddress ?? '',
             rating: place.rating ?? undefined,
             userRatingCount: place.userRatingCount ?? undefined,
+            types: place.types ?? undefined,
             isOpen: place.regularOpeningHours
               ? await place.isOpen().catch(() => undefined)
               : undefined,

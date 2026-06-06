@@ -1,8 +1,20 @@
-# Amenities tagging — design plan (not yet implemented)
+# Amenities tagging — design plan
 
-Status: **planning only.** This documents how we'd add indoor/outdoor and
-amenity information to court results, the data limitations that make it hard,
-and a phased path that avoids regressing the numbered-pin ↔ list correspondence.
+Status: **Phase 1 shipped; Phase 2 still planned.** This documents how we add
+indoor/outdoor and amenity information to court results, the data limitations
+that make it hard, and a phased path that avoids regressing the numbered-pin ↔
+list correspondence.
+
+**Phase 1 (badges, high-confidence only) is implemented:** the heuristic lives
+in `src/amenities.ts` (`inferAmenities(court): Tag[]`, with `high | low`
+confidence and tunable keyword tables), unit-tested in
+`src/Tests/amenities.test.ts`. `CourtList` renders only `high`-confidence tags
+as themed `Badge`s (`Indoor` court-blue, `Outdoor`/`Free` lime, `Lighted`
+sunshine), with the "best guesses from the listing name" disclaimer as the
+`Badges` row's `title`. The Place `types` field feeds the heuristic and is
+carried on the `Court` view-model (`src/types.ts`). **No filtering yet** — the
+list is unreordered, so the numbered map pins stay aligned. Phase 2 (the
+`displayedCourts` refactor + filtering) below is the remaining work.
 
 ## Goal
 
