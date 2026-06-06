@@ -37,8 +37,8 @@ const directionsUrl = (court: Court) =>
 
 const StarIcon = ({ filled }: { filled: boolean }) => (
   <svg
-    width="17"
-    height="17"
+    width="20"
+    height="20"
     viewBox="0 0 24 24"
     fill={filled ? 'currentColor' : 'none'}
     stroke="currentColor"
