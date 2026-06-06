@@ -13,6 +13,8 @@ import {
   Rating,
   RatingCount,
   Hours,
+  Badges,
+  Badge,
   DirectionsLink,
   StarButton,
   EmptySaved,
@@ -94,6 +96,18 @@ describe('CourtList.styles', () => {
 
     const { container: closed } = render(<Hours $isOpen={false} />)
     expect(closed.firstChild?.nodeName).toBe('P')
+  })
+
+  it('Badges renders a div', () => {
+    const { container } = render(<Badges />)
+    expect(container.firstChild?.nodeName).toBe('DIV')
+  })
+
+  it('Badge renders a span for each amenity kind', () => {
+    for (const kind of ['indoor', 'outdoor', 'lighted', 'free'] as const) {
+      const { container } = render(<Badge $kind={kind}>{kind}</Badge>)
+      expect(container.firstChild?.nodeName).toBe('SPAN')
+    }
   })
 
   it('DirectionsLink renders an a', () => {

@@ -7,5 +7,8 @@ export interface Court {
   rating?: number
   userRatingCount?: number
   isOpen?: boolean
+  // Coarse Google Place `types` (e.g. 'park', 'gym'). Kept on the view-model
+  // only as input to the amenity heuristic (`inferAmenities`); not displayed.
+  types?: string[]
   location: google.maps.LatLngLiteral
 }

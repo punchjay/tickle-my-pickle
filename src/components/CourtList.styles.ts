@@ -1,4 +1,5 @@
 import styled, { keyframes } from 'styled-components'
+import type { AmenityKind } from '../amenities'
 
 /* Entrance fade for the results panel; replays on each search because the
    list is remounted via a per-search key. */
@@ -177,6 +178,40 @@ export const Hours = styled.p<HoursProps>`
   line-height: 1.25;
   font-weight: 700;
   color: ${({ $isOpen }) => ($isOpen ? 'var(--pf-open)' : 'var(--pf-closed)')};
+`
+
+// Amenity badges on their own line, directly under the rating.
+export const Badges = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 2px 0;
+`
+
+interface BadgeProps {
+  $kind: AmenityKind
+}
+
+// Per-kind colors come straight from the theme: court-blue for Indoor (dark, so
+// light text), lime for Outdoor/Free and sunshine for Lighted (both light, so
+// dark text). The title carries the honest "best guess" disclaimer.
+const badgeColors: Record<AmenityKind, { bg: string; fg: string }> = {
+  indoor: { bg: 'var(--pf-court-blue)', fg: 'var(--pf-card)' },
+  outdoor: { bg: 'var(--pf-lime)', fg: 'var(--pf-midnight)' },
+  free: { bg: 'var(--pf-lime)', fg: 'var(--pf-midnight)' },
+  lighted: { bg: 'var(--pf-sunshine)', fg: 'var(--pf-midnight)' },
+}
+
+export const Badge = styled.span<BadgeProps>`
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: var(--pf-radius-pill);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  background: ${({ $kind }) => badgeColors[$kind].bg};
+  color: ${({ $kind }) => badgeColors[$kind].fg};
 `
 
 export const DirectionsLink = styled.a`

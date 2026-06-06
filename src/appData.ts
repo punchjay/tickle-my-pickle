@@ -29,6 +29,16 @@ export const courtList = {
   emptySaved: 'No saved courts yet — tap the star on a court to save it.',
 } as const
 
+// Amenity badge labels + the honest "these are guesses" note. Keyed by the
+// AmenityKind in src/amenities.ts so a tag maps straight to its label.
+export const amenities = {
+  indoor: 'Indoor',
+  outdoor: 'Outdoor',
+  lighted: 'Lighted',
+  free: 'Free',
+  disclaimer: 'Tags are best guesses from the listing name',
+} as const
+
 export const footer = {
   email: 'punchjay@gmail.com',
   githubUrl: 'https://github.com/punchjay',

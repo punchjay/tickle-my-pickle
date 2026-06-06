@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Court } from '../types'
-import { courtList } from '../appData'
+import { inferAmenities } from '../amenities'
+import { amenities, courtList } from '../appData'
 import {
   Sidebar,
   Tabs,
@@ -14,6 +15,8 @@ import {
   Rating,
   RatingCount,
   Hours,
+  Badges,
+  Badge,
   DirectionsLink,
   StarButton,
   EmptySaved,
@@ -90,33 +93,48 @@ const CourtList = ({
     )
   }
 
-  const details = (court: Court) => (
-    <Info>
-      <Name>{court.name}</Name>
-      <Address>{court.address}</Address>
-      {court.rating != null && (
-        <Rating>
-          ★ {court.rating}
-          {court.userRatingCount != null && (
-            <RatingCount> ({court.userRatingCount})</RatingCount>
-          )}
-        </Rating>
-      )}
-      {court.isOpen != null && (
-        <Hours $isOpen={court.isOpen}>
-          {court.isOpen ? courtList.openNow : courtList.closed}
-        </Hours>
-      )}
-      <DirectionsLink
-        href={directionsUrl(court)}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {courtList.directions}
-      </DirectionsLink>
-    </Info>
-  )
+  const details = (court: Court) => {
+    // Phase 1: show high-confidence amenity guesses only (labels, no filtering),
+    // so the numbered pins stay aligned with the list. See
+    // docs/amenities-tagging-plan.md.
+    const tags = inferAmenities(court).filter((t) => t.confidence === 'high')
+    return (
+      <Info>
+        <Name>{court.name}</Name>
+        {tags.length > 0 && (
+          <Badges title={amenities.disclaimer}>
+            {tags.map((t) => (
+              <Badge key={t.kind} $kind={t.kind}>
+                {amenities[t.kind]}
+              </Badge>
+            ))}
+          </Badges>
+        )}
+        <Address>{court.address}</Address>
+        {court.rating != null && (
+          <Rating>
+            ★ {court.rating}
+            {court.userRatingCount != null && (
+              <RatingCount> ({court.userRatingCount})</RatingCount>
+            )}
+          </Rating>
+        )}
+        {court.isOpen != null && (
+          <Hours $isOpen={court.isOpen}>
+            {court.isOpen ? courtList.openNow : courtList.closed}
+          </Hours>
+        )}
+        <DirectionsLink
+          href={directionsUrl(court)}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {courtList.directions}
+        </DirectionsLink>
+      </Info>
+    )
+  }
 
   return (
     <Sidebar>
