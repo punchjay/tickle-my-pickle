@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.3.1...tickle-my-pickle-app-v1.3.2) (2026-06-06)
+
+
+### Miscellaneous Chores
+
+* release tickle-my-pickle-app 1.3.2 ([#67](https://github.com/punchjay/tickle-my-pickle/issues/67)) ([1719572](https://github.com/punchjay/tickle-my-pickle/commit/1719572f835ddbe3b07669d2faa1f51251dc9f75))
+
 ## [1.3.1](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.3.0...tickle-my-pickle-app-v1.3.1) (2026-06-05)
 
 
