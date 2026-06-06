@@ -35,6 +35,22 @@ describe('LocationInput', () => {
     expect(onGeolocate).toHaveBeenCalled()
   })
 
+  it('clears the typed query when "Near me" is clicked', () => {
+    render(
+      <LocationInput
+        onSearch={() => {}}
+        onGeolocate={() => {}}
+        loading={false}
+        disabled={false}
+      />,
+    )
+    const input = screen.getByPlaceholderText(PLACEHOLDER) as HTMLInputElement
+    fireEvent.change(input, { target: { value: 'Seattle' } })
+    expect(input.value).toBe('Seattle')
+    fireEvent.click(screen.getByRole('button', { name: /near me/i }))
+    expect(input.value).toBe('')
+  })
+
   it('disables the input and actions when disabled prop is true', () => {
     render(
       <LocationInput
