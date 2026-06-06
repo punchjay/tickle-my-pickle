@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.3.2...tickle-my-pickle-app-v1.4.0) (2026-06-06)
+
+
+### Features
+
+* tag courts with indoor/outdoor & amenity badges ([#69](https://github.com/punchjay/tickle-my-pickle/issues/69)) ([4c55ae6](https://github.com/punchjay/tickle-my-pickle/commit/4c55ae6dc99c6d1f4a971b94330c5987a5d0e3b3))
+
 ## [1.3.2](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.3.1...tickle-my-pickle-app-v1.3.2) (2026-06-06)
 
 
