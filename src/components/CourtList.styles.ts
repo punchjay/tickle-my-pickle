@@ -19,7 +19,7 @@ export const Sidebar = styled.div`
   top: 184px;
   bottom: 16px;
   z-index: 10;
-  width: 300px;
+  width: 350px;
   background: var(--pf-card);
   border: 1px solid var(--pf-border-soft);
   border-radius: var(--pf-radius-md);
@@ -77,7 +77,8 @@ export const TabButton = styled.button<TabProps>`
   font-weight: 700;
   cursor: pointer;
   background: ${({ $active }) => ($active ? 'var(--pf-ivory)' : 'transparent')};
-  color: ${({ $active }) => ($active ? 'var(--pf-text)' : 'var(--pf-text-muted)')};
+  color: ${({ $active }) =>
+    $active ? 'var(--pf-text)' : 'var(--pf-text-muted)'};
 
   &:hover {
     color: var(--pf-text);
@@ -136,7 +137,7 @@ export const Info = styled.div`
 
 export const Name = styled.p`
   margin: 0 0 2px;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--pf-text);
   white-space: nowrap;
@@ -146,7 +147,7 @@ export const Name = styled.p`
 
 export const Address = styled.p`
   margin: 0 0 4px;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: var(--pf-text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -155,7 +156,7 @@ export const Address = styled.p`
 
 export const Rating = styled.p`
   margin: 0 0 2px;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: var(--pf-marigold);
 `
 
@@ -171,8 +172,7 @@ export const Hours = styled.p<HoursProps>`
   margin: 0;
   font-size: 0.75rem;
   font-weight: 700;
-  color: ${({ $isOpen }) =>
-    $isOpen ? 'var(--pf-open)' : 'var(--pf-closed)'};
+  color: ${({ $isOpen }) => ($isOpen ? 'var(--pf-open)' : 'var(--pf-closed)')};
 `
 
 export const DirectionsLink = styled.a`
@@ -180,7 +180,7 @@ export const DirectionsLink = styled.a`
   align-items: center;
   gap: 4px;
   margin-top: 6px;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--pf-link);
   text-decoration: none;
@@ -202,9 +202,9 @@ export const StarButton = styled.button<StarProps>`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  margin: -4px -4px 0 4px;
+  width: 32px;
+  height: 32px;
+  margin: -5px -5px 0 4px;
   padding: 0;
   border: none;
   background: transparent;
@@ -225,7 +225,7 @@ export const EmptySaved = styled.p`
   margin: 0;
   padding: 24px 20px;
   text-align: center;
-  font-size: 0.8125rem;
+  font-size: 0.85rem;
   line-height: 1.5;
   color: var(--pf-text-muted);
 `
