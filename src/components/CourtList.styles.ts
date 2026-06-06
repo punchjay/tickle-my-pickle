@@ -16,7 +16,7 @@ const fadeIn = keyframes`
 export const Sidebar = styled.div`
   position: absolute;
   left: 16px;
-  top: 184px;
+  top: 72px;
   bottom: 16px;
   z-index: 10;
   width: 350px;
@@ -100,7 +100,7 @@ interface ItemProps {
 export const Item = styled.li<ItemProps>`
   display: flex;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 8px 16px;
   cursor: pointer;
   align-items: flex-start;
   transition: background 0.1s;
@@ -138,6 +138,7 @@ export const Info = styled.div`
 export const Name = styled.p`
   margin: 0 0 2px;
   font-size: 1rem;
+  line-height: 1.25;
   font-weight: 700;
   color: var(--pf-text);
   white-space: nowrap;
@@ -146,8 +147,9 @@ export const Name = styled.p`
 `
 
 export const Address = styled.p`
-  margin: 0 0 4px;
+  margin: 0 0 2px;
   font-size: 0.85rem;
+  line-height: 1.25;
   color: var(--pf-text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -157,6 +159,7 @@ export const Address = styled.p`
 export const Rating = styled.p`
   margin: 0 0 2px;
   font-size: 0.85rem;
+  line-height: 1.25;
   color: var(--pf-marigold);
 `
 
@@ -171,6 +174,7 @@ interface HoursProps {
 export const Hours = styled.p<HoursProps>`
   margin: 0;
   font-size: 0.75rem;
+  line-height: 1.25;
   font-weight: 700;
   color: ${({ $isOpen }) => ($isOpen ? 'var(--pf-open)' : 'var(--pf-closed)')};
 `
@@ -179,7 +183,7 @@ export const DirectionsLink = styled.a`
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-top: 6px;
+  margin-top: 4px;
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--pf-link);
