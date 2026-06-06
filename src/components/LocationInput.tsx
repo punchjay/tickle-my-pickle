@@ -77,6 +77,13 @@ const LocationInput = ({
     if (trimmed) onSearch(trimmed)
   }
 
+  // Clear the typed location when searching by current position, so the input
+  // doesn't keep showing a stale query that no longer matches the results.
+  const handleGeolocate = () => {
+    setQuery('')
+    onGeolocate()
+  }
+
   return (
     <Wrapper>
       <SearchForm onSubmit={handleSubmit}>
@@ -99,7 +106,7 @@ const LocationInput = ({
       <Divider aria-hidden="true" />
       <NearMeButton
         type="button"
-        onClick={onGeolocate}
+        onClick={handleGeolocate}
         disabled={disabled || loading}
       >
         <NearMeIcon />
