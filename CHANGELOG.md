@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.4.0...tickle-my-pickle-app-v1.5.0) (2026-06-07)
+
+
+### Features
+
+* clear the search input when "Near me" is pressed ([#71](https://github.com/punchjay/tickle-my-pickle/issues/71)) ([8b3013b](https://github.com/punchjay/tickle-my-pickle/commit/8b3013bb7d7c705f5eddce00bc2bf5fb1a7c51db))
+
 ## [1.4.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.3.2...tickle-my-pickle-app-v1.4.0) (2026-06-06)
 
 
