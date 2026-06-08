@@ -27,7 +27,7 @@ React 19 + TypeScript 6 + Vite 8 + styled-components v6 + React Router v7. Entry
 
 ## What this app does
 
-Pickleball court finder. User enters a free-text location (city, ZIP, or neighborhood) or uses browser geolocation; the app geocodes the location and runs a Google Maps Places text search ("pickleball court", ~10-mile location bias), drops numbered markers on the map, and shows a scrollable sidebar of results with name, address, rating, open/closed status, and a "Directions" link (opens Google Maps turn-by-turn in a new tab). Selecting a court — by clicking its card or its pin — highlights the card, scrolls it into view, pans the map, and emphasizes that pin. Each card has a star to **save** the court; the sidebar has **Nearby** / **Saved** tabs, and favorites persist across sessions in `localStorage` (`useFavorites`). Note: the Saved tab lives inside the results sidebar, so it's reachable after a search; a pre-search favorites entry point is a documented follow-up. (Indoor/outdoor & amenity tagging is designed but not built — see `docs/amenities-tagging-plan.md`.)
+Pickleball court finder. User enters a free-text location (city, ZIP, or neighborhood) or uses browser geolocation; the app geocodes the location and runs a Google Maps Places text search ("pickleball court", ~10-mile location bias), drops numbered markers on the map, and shows a scrollable sidebar of results with name, address, rating, open/closed status, and a "Directions" link (opens Google Maps turn-by-turn in a new tab). Selecting a court — by clicking its card or its pin — highlights the card, scrolls it into view, pans the map, and emphasizes that pin. Each card has a star to **save** the court; the sidebar has **Nearby** / **Saved** tabs, and favorites persist across sessions in `localStorage` (`useFavorites`). Note: the Saved tab lives inside the results sidebar, so it's reachable after a search; a pre-search favorites entry point is a documented follow-up. Court cards also show inferred **amenity badges** (indoor/outdoor/lighted/free) — heuristically derived from the listing name and Place `types` (`amenities.ts`), since the Places API carries no structured amenity signal; only high-confidence guesses show by default. See `docs/amenities-tagging-plan.md`.
 
 ## Environment
 
@@ -50,11 +50,13 @@ public/
 src/
   App.tsx                    # route table (<Routes>): / → FinderPage, * → NotFoundPage
   appData.ts                 # centralized UI copy (single source of truth for user-facing strings)
+  amenities.ts               # heuristic amenity tagging (indoor/outdoor/lighted/free) w/ confidence, from name + Place types
   types.ts                   # Court view-model (decoupled from google.maps types)
   theme.ts                   # typed design tokens (palette/semantic/fonts/radii/shadows) — source of truth
   GlobalStyle.ts             # createGlobalStyle: emits --pf-* CSS vars on :root + base type
   index.css                  # global reset only (box-sizing, html/body height)
   pages/
+    backdrop.styles.ts       # shared striped-backdrop + fade-in keyframes (FinderPage + NotFoundPage)
     FinderPage.tsx           # the finder: composes map + overlay UI from the hook
     FinderPage.styles.ts     # styled-components for FinderPage
     NotFoundPage.tsx         # 404 page (themed, links back home)
@@ -79,12 +81,16 @@ src/
     CourtList.test.tsx       # behavior tests (count, selection, rating, open/closed)
     usePickleballMap.test.tsx # hook tests against a faked google.maps global
     useFavorites.test.tsx     # favorites hook: add/remove/persist/rehydrate (renderHook)
+    appData.test.ts          # courtList.heading(count) singular/plural/zero
+    amenities.test.ts        # inferAmenities heuristic: tags + confidence from name/types
+    Footer.test.tsx          # wordmark/year, mailto + GitHub links
     FinderPage.styles.test.tsx    # per-styled-component render smoke tests
     LocationInput.styles.test.tsx # per-styled-component render smoke tests
     CourtList.styles.test.tsx     # per-styled-component render smoke tests
     ErrorBoundary.styles.test.tsx # per-styled-component render smoke tests
     NotFoundPage.styles.test.tsx  # per-styled-component render smoke tests
     Spinner.styles.test.tsx       # per-styled-component render smoke tests
+    Footer.styles.test.tsx        # per-styled-component render smoke tests
 ```
 
 All map/search logic lives in `usePickleballMap.ts`; `FinderPage.tsx` is a thin
@@ -121,10 +127,11 @@ Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`)
 
 ## Testing
 
-Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Fourteen test files. The suite is **snapshot-free** — tests assert behavior and structure directly (queries, element types, `fireEvent` interactions), not serialized DOM, so there is no `__snapshots__/` to maintain or review.
+Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Fifteen test files. The suite is **snapshot-free** — tests assert behavior and structure directly (queries, element types, `fireEvent` interactions), not serialized DOM, so there is no `__snapshots__/` to maintain or review.
 
 - **Routing** (`App.test.tsx`) — renders `<App />` inside a `MemoryRouter` and asserts the finder renders at `/` (header title/tagline + search input) and the 404 page renders at an unknown route (awaited with `findByRole` since `NotFoundPage` is lazy).
 - **Copy** (`appData.test.ts`) — unit-tests the only logic in `appData.ts`, `courtList.heading(count)` (singular/plural/zero). The other entries are constant strings, covered indirectly by the component/routing tests.
+- **Amenities** (`amenities.test.ts`) — unit-tests the `inferAmenities` heuristic: which tags fire from a listing's name + Place `types`, and the `high`/`low` confidence assigned to each.
 - **Behavior** (`CourtList.test.tsx`) — renders with mock court data and asserts the Nearby/Saved tab counts, `onSelect` on click, scroll-into-view on selection change, conditional rating / open-closed rendering, the directions link, the star toggle (calls `onToggleFavorite`, doesn't select the row, reflects `aria-pressed`), and the Saved tab (lists favorites, empty state).
 - **Interaction** (`LocationInput.test.tsx`) — the search is a free-text pill (no ZIP/numeric gate); interaction tests use `fireEvent` (not `userEvent` — not installed) to verify submit (via the magnifying-glass submit button), the "Near me" geolocation action, and the disabled + loading states. The trim/guard tests dispatch `fireEvent.submit` on the form directly.
 - **Styled-components smoke** (`FinderPage.styles.test.tsx`, `LocationInput.styles.test.tsx`, `CourtList.styles.test.tsx`, `ErrorBoundary.styles.test.tsx`, `NotFoundPage.styles.test.tsx`, `Spinner.styles.test.tsx`, `Footer.styles.test.tsx`) — one per `*.styles.ts` file; each renders every export and asserts it mounts as the expected element type (and, where a child is passed, its text). Conditional styled-components are rendered in both prop states; `NotFoundPage`'s `HomeLink` (a `styled(Link)`) is wrapped in a `MemoryRouter`.
