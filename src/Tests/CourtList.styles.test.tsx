@@ -4,6 +4,8 @@ import {
   Header,
   Tabs,
   TabButton,
+  FilterBar,
+  FilterButton,
   List,
   Item,
   CourtNum,
@@ -18,6 +20,9 @@ import {
   DirectionsLink,
   StarButton,
   EmptySaved,
+  EmptyFiltered,
+  HiddenNote,
+  ShowAllButton,
 } from '@/components/CourtList.styles'
 
 describe('CourtList.styles', () => {
@@ -41,6 +46,19 @@ describe('CourtList.styles', () => {
     expect(active.firstChild?.nodeName).toBe('BUTTON')
 
     const { container: inactive } = render(<TabButton $active={false} />)
+    expect(inactive.firstChild?.nodeName).toBe('BUTTON')
+  })
+
+  it('FilterBar renders a div', () => {
+    const { container } = render(<FilterBar />)
+    expect(container.firstChild?.nodeName).toBe('DIV')
+  })
+
+  it('FilterButton renders a button (active and inactive)', () => {
+    const { container: active } = render(<FilterButton $active={true} />)
+    expect(active.firstChild?.nodeName).toBe('BUTTON')
+
+    const { container: inactive } = render(<FilterButton $active={false} />)
     expect(inactive.firstChild?.nodeName).toBe('BUTTON')
   })
 
@@ -126,5 +144,20 @@ describe('CourtList.styles', () => {
   it('EmptySaved renders a p', () => {
     const { container } = render(<EmptySaved />)
     expect(container.firstChild?.nodeName).toBe('P')
+  })
+
+  it('EmptyFiltered renders a p', () => {
+    const { container } = render(<EmptyFiltered />)
+    expect(container.firstChild?.nodeName).toBe('P')
+  })
+
+  it('HiddenNote renders a p', () => {
+    const { container } = render(<HiddenNote />)
+    expect(container.firstChild?.nodeName).toBe('P')
+  })
+
+  it('ShowAllButton renders a button', () => {
+    const { container } = render(<ShowAllButton />)
+    expect(container.firstChild?.nodeName).toBe('BUTTON')
   })
 })

@@ -27,6 +27,17 @@ export const courtList = {
   save: 'Save court',
   unsave: 'Remove from saved',
   emptySaved: 'No saved courts yet — tap the star on a court to save it.',
+  // Amenity filter (Nearby tab): a segmented All / Indoor / Outdoor control.
+  filterLabel: 'Filter courts by type',
+  filterAll: 'All',
+  filterIndoor: 'Indoor',
+  filterOutdoor: 'Outdoor',
+  // "3 courts hidden by filter" — the honest escape so a guess can't silently
+  // drop a real result.
+  hiddenByFilter: (count: number) =>
+    `${count} ${count === 1 ? 'court' : 'courts'} hidden by filter`,
+  showAll: 'Show all',
+  emptyFiltered: 'No nearby courts match this filter.',
 } as const
 
 // Amenity badge labels + the honest "these are guesses" note. Keyed by the

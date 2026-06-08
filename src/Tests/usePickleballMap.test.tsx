@@ -53,6 +53,12 @@ class FakeGeocoder {
     geocodeImpl(req, cb)
   }
 }
+// Every marker the hook builds is registered here so tests can assert the
+// pins stay in lockstep with the displayed list. A marker is "live" while its
+// .map is set; the hook nulls .map when it tears a pin down.
+let createdMarkers: FakeAdvancedMarker[] = []
+const liveMarkers = () => createdMarkers.filter((m) => m.map != null)
+
 class FakeAdvancedMarker {
   map: unknown
   // Real AdvancedMarkerElement extends HTMLElement; the hook listens via
@@ -60,6 +66,7 @@ class FakeAdvancedMarker {
   addEventListener = vi.fn()
   constructor(opts: { map: unknown }) {
     this.map = opts.map
+    createdMarkers.push(this)
   }
 }
 class FakePin {
@@ -72,7 +79,10 @@ function installGoogle() {
       Map: FakeMap,
       Geocoder: FakeGeocoder,
       places: { Place: { searchByText: () => searchByTextImpl() } },
-      marker: { AdvancedMarkerElement: FakeAdvancedMarker, PinElement: FakePin },
+      marker: {
+        AdvancedMarkerElement: FakeAdvancedMarker,
+        PinElement: FakePin,
+      },
     },
   }
   ;(globalThis as { google?: unknown }).google = mock
@@ -99,10 +109,14 @@ const Harness = () => {
 beforeEach(async () => {
   vi.resetModules()
   vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', 'test-key')
+  createdMarkers = []
   installGoogle()
   // Sensible defaults; individual tests override as needed.
   geocodeImpl = (_req, cb) =>
-    cb([{ geometry: { location: { lat: () => 39.78, lng: () => -89.65 } } }], 'OK')
+    cb(
+      [{ geometry: { location: { lat: () => 39.78, lng: () => -89.65 } } }],
+      'OK',
+    )
   searchByTextImpl = () => Promise.resolve({ places: [makePlace()] })
   ;({ usePickleballMap: useHook } = await import('@/hooks/usePickleballMap'))
 })
@@ -202,6 +216,45 @@ describe('usePickleballMap', () => {
     expect(hookApi.courts[0].name).toBe('Court Two')
     // The list's fade key advances so its entrance animation replays.
     expect(hookApi.searchSeq).toBe(seqAfterFirst + 1)
+  })
+
+  it('filters the displayed list and re-pins markers in lockstep (Phase 2)', async () => {
+    searchByTextImpl = () =>
+      Promise.resolve({
+        places: [
+          makePlace({ id: 'in', displayName: 'Downtown Gym' }), // indoor (high)
+          makePlace({ id: 'out', displayName: 'Riverside Park' }), // outdoor (high)
+        ],
+      })
+    await renderReady()
+    await runSearch()
+
+    expect(hookApi.courts).toHaveLength(2)
+    expect(hookApi.displayedCourts).toHaveLength(2)
+    expect(liveMarkers()).toHaveLength(2) // one pin per displayed court
+
+    // Filter to indoor: only the gym shows, the full result set is untouched,
+    // and the map re-pins to match the shortened list.
+    act(() => hookApi.setAmenityFilter('indoor'))
+    await waitFor(() => expect(hookApi.displayedCourts).toHaveLength(1))
+    expect(hookApi.displayedCourts[0].id).toBe('in')
+    expect(hookApi.courts).toHaveLength(2)
+    expect(liveMarkers()).toHaveLength(1)
+
+    // Clearing the filter restores every court and pin.
+    act(() => hookApi.setAmenityFilter('all'))
+    await waitFor(() => expect(hookApi.displayedCourts).toHaveLength(2))
+    expect(liveMarkers()).toHaveLength(2)
+  })
+
+  it('resets the amenity filter on a fresh search', async () => {
+    await renderReady()
+    await runSearch()
+    act(() => hookApi.setAmenityFilter('indoor'))
+    expect(hookApi.amenityFilter).toBe('indoor')
+
+    await runSearch('98101')
+    expect(hookApi.amenityFilter).toBe('all')
   })
 
   it('selects a court and pans the map on handleCourtSelect', async () => {

@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import CourtList from '@/components/CourtList'
 import type { Court } from '@/types'
 
@@ -33,11 +33,17 @@ const courts: Court[] = [
   },
 ]
 
-// Renders CourtList with sensible favorites defaults; individual tests override.
-const renderList = (props: Partial<ComponentProps<typeof CourtList>> = {}) =>
-  render(
+// Renders CourtList with sensible defaults; individual tests override. Defaults
+// to the unfiltered state (all courts shown, filter "all"), so existing
+// behavior tests are unaffected by the amenity filter.
+const renderList = (props: Partial<ComponentProps<typeof CourtList>> = {}) => {
+  const list = props.courts ?? courts
+  return render(
     <CourtList
-      courts={courts}
+      courts={list}
+      nearbyTotal={list.length}
+      amenityFilter="all"
+      onFilterChange={() => {}}
       selectedCourt={null}
       onSelect={() => {}}
       favorites={[]}
@@ -46,6 +52,7 @@ const renderList = (props: Partial<ComponentProps<typeof CourtList>> = {}) =>
       {...props}
     />,
   )
+}
 
 describe('CourtList', () => {
   beforeEach(() => scrollIntoViewMock.mockClear())
@@ -72,6 +79,9 @@ describe('CourtList', () => {
     rerender(
       <CourtList
         courts={courts}
+        nearbyTotal={courts.length}
+        amenityFilter="all"
+        onFilterChange={() => {}}
         selectedCourt={courts[2]}
         onSelect={() => {}}
         favorites={[]}
@@ -180,10 +190,58 @@ describe('CourtList', () => {
       },
     ]
     renderList({ courts: tagged })
-    expect(screen.getByText('Outdoor')).toBeInTheDocument()
-    expect(screen.getByText('Free')).toBeInTheDocument()
-    expect(screen.getByText('Indoor')).toBeInTheDocument()
+    // Scope to the badge spans — "Indoor"/"Outdoor" also label filter buttons.
+    expect(
+      screen.getByText('Outdoor', { selector: 'span' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Free', { selector: 'span' })).toBeInTheDocument()
+    expect(screen.getByText('Indoor', { selector: 'span' })).toBeInTheDocument()
     // The low-confidence club hint shows nothing.
-    expect(screen.queryByText('Lighted')).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('Lighted', { selector: 'span' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('renders the amenity filter and calls onFilterChange when a segment is clicked', () => {
+    const onFilterChange = vi.fn()
+    renderList({ onFilterChange })
+    const group = screen.getByRole('group', { name: /Filter courts by type/ })
+    // The active "All" segment reflects aria-pressed.
+    const allBtn = screen.getByRole('button', { name: 'All' })
+    expect(allBtn).toHaveAttribute('aria-pressed', 'true')
+
+    fireEvent.click(within(group).getByRole('button', { name: 'Indoor' }))
+    expect(onFilterChange).toHaveBeenCalledWith('indoor')
+  })
+
+  it('shows the total nearby count on the tab even when the list is filtered down', () => {
+    // courts is the already-filtered list (1 shown); nearbyTotal is the full 3.
+    renderList({ courts: [courts[0]], nearbyTotal: 3, amenityFilter: 'indoor' })
+    expect(
+      screen.getByRole('tab', { name: /Nearby \(3\)/ }),
+    ).toBeInTheDocument()
+  })
+
+  it('shows a "N hidden" note with a clear action when the filter hides courts', () => {
+    const onFilterChange = vi.fn()
+    renderList({
+      courts: [courts[0]],
+      nearbyTotal: 3,
+      amenityFilter: 'indoor',
+      onFilterChange,
+    })
+    expect(screen.getByText(/2 courts hidden by filter/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Show all' }))
+    expect(onFilterChange).toHaveBeenCalledWith('all')
+  })
+
+  it('shows an empty-filtered state (not the hidden note) when nothing matches', () => {
+    renderList({ courts: [], nearbyTotal: 3, amenityFilter: 'indoor' })
+    expect(
+      screen.getByText(/No nearby courts match this filter/),
+    ).toBeInTheDocument()
+    // The hidden note is suppressed in the empty case (its own Show all covers it).
+    expect(screen.queryByText(/hidden by filter/)).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Show all' })).toBeInTheDocument()
   })
 })

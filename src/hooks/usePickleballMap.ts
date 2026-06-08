@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 import type { Court } from '../types'
+import { hasAmenity } from '../amenities'
+import type { AmenityFilter } from '../amenities'
 import { palette } from '../theme'
 import { errors, searchQuery, unknownCourt } from '../appData'
 
@@ -56,6 +58,20 @@ export function usePickleballMap() {
 
   const [courts, setCourts] = useState<Court[]>([])
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null)
+  const [amenityFilter, setAmenityFilter] = useState<AmenityFilter>('all')
+
+  // The courts actually shown — the full result set narrowed by the amenity
+  // filter. Single source of truth for both the sidebar list and the map
+  // markers (the marker effect keys on this), so a filter can never desync the
+  // numbered pins from the list. Returns the `courts` reference unchanged when
+  // unfiltered, so toggling back to "all" doesn't needlessly rebuild markers.
+  const displayedCourts = useMemo(
+    () =>
+      amenityFilter === 'all'
+        ? courts
+        : courts.filter((c) => hasAmenity(c, amenityFilter)),
+    [courts, amenityFilter],
+  )
   // Drives the map's opacity fade independently of `courts`: the map fades out
   // while a (re-)search runs and fades back in once new results land.
   const [mapShown, setMapShown] = useState(false)
@@ -109,6 +125,9 @@ export function usePickleballMap() {
       setLoading(true)
       setError(null)
       setSelectedCourt(null)
+      // A fresh search starts unfiltered, so results are never hidden behind a
+      // filter left over from the previous location.
+      setAmenityFilter('all')
       // Fade the map out while the new location loads. Previous results are
       // intentionally kept until the new ones land, so the overlay (driven by
       // courts.length) stays pinned to the top during a re-search instead of
@@ -182,11 +201,11 @@ export function usePickleballMap() {
   )
 
   // Markers are a pure function of the displayed court list: tear down the old
-  // pins and re-create them in list order whenever `courts` changes, so the
-  // numbered glyphs always match the sidebar even once the list is filtered or
-  // reordered. Each pin reflects the current selection (via the ref) at build
-  // time. Guarded on having a map + results — true only after a search, by
-  // which point the marker library has loaded.
+  // pins and re-create them in list order whenever `displayedCourts` changes,
+  // so the numbered glyphs always match the sidebar even when the amenity
+  // filter narrows the list. Each pin reflects the current selection (via the
+  // ref) at build time. Guarded on having a map + results — true only after a
+  // search, by which point the marker library has loaded.
   useEffect(() => {
     markersRef.current.forEach(({ marker }) => {
       marker.map = null
@@ -194,10 +213,10 @@ export function usePickleballMap() {
     markersRef.current = []
 
     const map = mapRef.current
-    if (!map || courts.length === 0) return
+    if (!map || displayedCourts.length === 0) return
 
     const { AdvancedMarkerElement } = google.maps.marker
-    markersRef.current = courts.map((court, i) => {
+    markersRef.current = displayedCourts.map((court, i) => {
       const marker = new AdvancedMarkerElement({
         map,
         position: court.location,
@@ -208,7 +227,7 @@ export function usePickleballMap() {
       marker.addEventListener('gmp-click', () => setSelectedCourt(court))
       return { court, marker }
     })
-  }, [courts])
+  }, [displayedCourts])
 
   // Re-skin the pins in place whenever the selection changes so the chosen
   // court reads as "active" on the map, mirroring the highlighted sidebar card.
@@ -268,6 +287,9 @@ export function usePickleballMap() {
   return {
     mapDivRef,
     courts,
+    displayedCourts,
+    amenityFilter,
+    setAmenityFilter,
     selectedCourt,
     mapShown,
     searchSeq,

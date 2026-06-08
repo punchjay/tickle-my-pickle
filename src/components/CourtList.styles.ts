@@ -86,6 +86,33 @@ export const TabButton = styled.button<TabProps>`
   }
 `
 
+// Segmented amenity filter (All / Indoor / Outdoor) above the Nearby list.
+export const FilterBar = styled.div`
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border-bottom: 1px solid var(--pf-border-soft);
+  flex-shrink: 0;
+`
+
+export const FilterButton = styled.button<TabProps>`
+  flex: 1;
+  border: 1px solid var(--pf-border-soft);
+  border-radius: var(--pf-radius-pill);
+  padding: 5px 8px;
+  font-family: var(--pf-font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: ${({ $active }) => ($active ? 'var(--pf-text)' : 'transparent')};
+  color: ${({ $active }) =>
+    $active ? 'var(--pf-card)' : 'var(--pf-text-muted)'};
+
+  &:hover {
+    color: ${({ $active }) => ($active ? 'var(--pf-card)' : 'var(--pf-text)')};
+  }
+`
+
 export const List = styled.ul`
   list-style: none;
   margin: 0;
@@ -267,4 +294,43 @@ export const EmptySaved = styled.p`
   font-size: 0.85rem;
   line-height: 1.5;
   color: var(--pf-text-muted);
+`
+
+// Shown in the Nearby list when the active filter matches nothing.
+export const EmptyFiltered = styled.p`
+  flex: 1;
+  margin: 0;
+  padding: 24px 20px;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--pf-text-muted);
+`
+
+// The honest "N courts hidden by filter" escape, pinned under the list.
+export const HiddenNote = styled.p`
+  margin: 0;
+  padding: 8px 16px;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--pf-text-muted);
+  background: var(--pf-surface);
+  border-top: 1px solid var(--pf-border-soft);
+`
+
+// Inline text button to clear the filter, used by both the hidden note and the
+// empty-filtered state.
+export const ShowAllButton = styled.button`
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--pf-link);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `

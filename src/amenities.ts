@@ -9,6 +9,10 @@ import type { Court } from './types'
 export type AmenityKind = 'indoor' | 'outdoor' | 'lighted' | 'free'
 export type Confidence = 'high' | 'low'
 
+// The Nearby-tab amenity filter. Only indoor/outdoor are filterable (the
+// headline ask and the least error-prone inferences); 'all' is the default.
+export type AmenityFilter = 'all' | 'indoor' | 'outdoor'
+
 export interface Tag {
   kind: AmenityKind
   confidence: Confidence
@@ -71,4 +75,14 @@ export function inferAmenities(court: Court): Tag[] {
     tags.push({ kind: 'free', confidence: 'high' })
 
   return tags
+}
+
+// Does the court carry a *high*-confidence tag of this kind? The Nearby-tab
+// filter only ever matches on high-confidence guesses, so a weak inference
+// can never hide a real court — untagged/low-confidence courts are surfaced via
+// the "N hidden" escape instead.
+export function hasAmenity(court: Court, kind: AmenityKind): boolean {
+  return inferAmenities(court).some(
+    (t) => t.kind === kind && t.confidence === 'high',
+  )
 }

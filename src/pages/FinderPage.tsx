@@ -19,6 +19,9 @@ const FinderPage = () => {
   const {
     mapDivRef,
     courts,
+    displayedCourts,
+    amenityFilter,
+    setAmenityFilter,
     selectedCourt,
     mapShown,
     searchSeq,
@@ -59,7 +62,10 @@ const FinderPage = () => {
       {courts.length > 0 ? (
         <CourtList
           key={searchSeq}
-          courts={courts}
+          courts={displayedCourts}
+          nearbyTotal={courts.length}
+          amenityFilter={amenityFilter}
+          onFilterChange={setAmenityFilter}
           selectedCourt={selectedCourt}
           onSelect={handleCourtSelect}
           favorites={favorites}

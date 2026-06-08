@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Court } from '../types'
 import { inferAmenities } from '../amenities'
+import type { AmenityFilter } from '../amenities'
 import { amenities, courtList } from '../appData'
 import {
   Sidebar,
   Tabs,
   TabButton,
+  FilterBar,
+  FilterButton,
   List,
   Item,
   CourtNum,
@@ -20,16 +23,31 @@ import {
   DirectionsLink,
   StarButton,
   EmptySaved,
+  EmptyFiltered,
+  HiddenNote,
+  ShowAllButton,
 } from './CourtList.styles'
 
 interface Props {
   courts: Court[]
+  // Total nearby results before the amenity filter — drives the Nearby tab
+  // count and the "N hidden" math. `courts` is the already-filtered list.
+  nearbyTotal: number
+  amenityFilter: AmenityFilter
+  onFilterChange: (filter: AmenityFilter) => void
   selectedCourt: Court | null
   onSelect: (court: Court) => void
   favorites: Court[]
   isFavorite: (id: string) => boolean
   onToggleFavorite: (court: Court) => void
 }
+
+// The segmented filter options, paired with their labels.
+const filterOptions: { value: AmenityFilter; label: string }[] = [
+  { value: 'all', label: courtList.filterAll },
+  { value: 'indoor', label: courtList.filterIndoor },
+  { value: 'outdoor', label: courtList.filterOutdoor },
+]
 
 // Google Maps "Universal" directions URL — opens turn-by-turn to the court in
 // a new tab. Pinning the place id keeps it exact even when names collide.
@@ -57,6 +75,9 @@ type Tab = 'nearby' | 'saved'
 
 const CourtList = ({
   courts,
+  nearbyTotal,
+  amenityFilter,
+  onFilterChange,
   selectedCourt,
   onSelect,
   favorites,
@@ -65,6 +86,7 @@ const CourtList = ({
 }: Props) => {
   const [tab, setTab] = useState<Tab>('nearby')
   const itemRefs = useRef<(HTMLLIElement | null)[]>([])
+  const hiddenCount = nearbyTotal - courts.length
 
   useEffect(() => {
     if (tab !== 'nearby' || !selectedCourt) return
@@ -94,9 +116,8 @@ const CourtList = ({
   }
 
   const details = (court: Court) => {
-    // Phase 1: show high-confidence amenity guesses only (labels, no filtering),
-    // so the numbered pins stay aligned with the list. See
-    // docs/amenities-tagging-plan.md.
+    // Show high-confidence amenity guesses only — the same bar the Nearby
+    // filter uses. See docs/amenities-tagging-plan.md.
     const tags = inferAmenities(court).filter((t) => t.confidence === 'high')
     return (
       <Info>
@@ -146,7 +167,7 @@ const CourtList = ({
           $active={tab === 'nearby'}
           onClick={() => setTab('nearby')}
         >
-          {courtList.nearbyTab} ({courts.length})
+          {courtList.nearbyTab} ({nearbyTotal})
         </TabButton>
         <TabButton
           type="button"
@@ -160,25 +181,63 @@ const CourtList = ({
       </Tabs>
 
       {tab === 'nearby' ? (
-        <List aria-label={courtList.heading(courts.length)}>
-          {courts.map((court, i) => {
-            const selected = court === selectedCourt
-            return (
-              <Item
-                key={court.id ?? i}
-                ref={(el) => {
-                  itemRefs.current[i] = el
-                }}
-                $selected={selected}
-                onClick={() => onSelect(court)}
+        <>
+          <FilterBar role="group" aria-label={courtList.filterLabel}>
+            {filterOptions.map(({ value, label }) => (
+              <FilterButton
+                key={value}
+                type="button"
+                $active={amenityFilter === value}
+                aria-pressed={amenityFilter === value}
+                onClick={() => onFilterChange(value)}
               >
-                <CourtNum $selected={selected}>{i + 1}</CourtNum>
-                {details(court)}
-                {star(court)}
-              </Item>
-            )
-          })}
-        </List>
+                {label}
+              </FilterButton>
+            ))}
+          </FilterBar>
+          {courts.length === 0 ? (
+            <EmptyFiltered>
+              {courtList.emptyFiltered}{' '}
+              <ShowAllButton
+                type="button"
+                onClick={() => onFilterChange('all')}
+              >
+                {courtList.showAll}
+              </ShowAllButton>
+            </EmptyFiltered>
+          ) : (
+            <List aria-label={courtList.heading(courts.length)}>
+              {courts.map((court, i) => {
+                const selected = court === selectedCourt
+                return (
+                  <Item
+                    key={court.id ?? i}
+                    ref={(el) => {
+                      itemRefs.current[i] = el
+                    }}
+                    $selected={selected}
+                    onClick={() => onSelect(court)}
+                  >
+                    <CourtNum $selected={selected}>{i + 1}</CourtNum>
+                    {details(court)}
+                    {star(court)}
+                  </Item>
+                )
+              })}
+            </List>
+          )}
+          {hiddenCount > 0 && courts.length > 0 && (
+            <HiddenNote>
+              {courtList.hiddenByFilter(hiddenCount)}{' '}
+              <ShowAllButton
+                type="button"
+                onClick={() => onFilterChange('all')}
+              >
+                {courtList.showAll}
+              </ShowAllButton>
+            </HiddenNote>
+          )}
+        </>
       ) : favorites.length === 0 ? (
         <EmptySaved>{courtList.emptySaved}</EmptySaved>
       ) : (

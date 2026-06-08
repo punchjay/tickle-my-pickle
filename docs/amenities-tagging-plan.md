@@ -1,9 +1,9 @@
 # Amenities tagging — design plan
 
-Status: **Phase 1 shipped; Phase 2 still planned.** This documents how we add
-indoor/outdoor and amenity information to court results, the data limitations
-that make it hard, and a phased path that avoids regressing the numbered-pin ↔
-list correspondence.
+Status: **Phase 1 + Phase 2 shipped.** This documents how we add indoor/outdoor
+and amenity information to court results, the data limitations that make it hard,
+and the phased path that avoided regressing the numbered-pin ↔ list
+correspondence.
 
 **Phase 1 (badges, high-confidence only) is implemented:** the heuristic lives
 in `src/amenities.ts` (`inferAmenities(court): Tag[]`, with `high | low`
@@ -12,9 +12,15 @@ confidence and tunable keyword tables), unit-tested in
 as themed `Badge`s (`Indoor` court-blue, `Outdoor`/`Free` lime, `Lighted`
 sunshine), with the "best guesses from the listing name" disclaimer as the
 `Badges` row's `title`. The Place `types` field feeds the heuristic and is
-carried on the `Court` view-model (`src/types.ts`). **No filtering yet** — the
-list is unreordered, so the numbered map pins stay aligned. Phase 2 (the
-`displayedCourts` refactor + filtering) below is the remaining work.
+carried on the `Court` view-model (`src/types.ts`).
+
+**Phase 2 (filtering) is implemented:** an `All / Indoor / Outdoor` segmented
+control on the Nearby tab. `usePickleballMap` derives a `displayedCourts` array
+(`courts` narrowed by `hasAmenity`, high-confidence only); both the sidebar list
+and the map markers are a pure function of it, so the numbered pins always match
+the list. Untagged courts aren't silently dropped — a "N courts hidden by
+filter — Show all" escape (and an empty-filtered state) keep it honest and
+reversible. The filter resets to `all` on each new search.
 
 ## Goal
 
@@ -85,22 +91,27 @@ default.
 - Add a one-line, honest disclaimer ("based on the listing name") or a tooltip,
   since tags are inferred.
 
-### Phase 2 — filtering, done correctly
+### Phase 2 — filtering, done correctly (shipped)
 
-Filtering hides/reorders cards, which **desyncs the numbered map pins** from the
-list unless the map is re-pinned to match. The correct fix is architectural:
+Filtering hides cards, which **desyncs the numbered map pins** from the list
+unless the map is re-pinned to match. The fix was architectural, done in two
+steps:
 
-1. Introduce a single `displayedCourts` array that is the source of truth for
-   **both** the sidebar list and the map markers.
-2. Move marker creation out of `searchNearby` into an effect keyed on
-   `displayedCourts` (clear + re-pin + renumber) — markers become a pure
-   function of what's displayed, so any filter/sort can't desync them.
-3. Layer the amenity filter (and, for free, distance/rating sort and the
-   "open now" filter) on top of that array.
+1. **Markers as a pure function of the shown list.** Marker creation moved out
+   of `searchNearby` into an effect that tears down + rebuilds pins (re-pin +
+   renumber) whenever the displayed list changes, keyed by court id rather than
+   array position. (Shipped first, as a standalone refactor.)
+2. **The `displayedCourts` array + filter.** `usePickleballMap` holds an
+   `amenityFilter` (`all | indoor | outdoor`) and derives
+   `displayedCourts = courts` narrowed by `hasAmenity(court, kind)` (high
+   confidence only). Both the sidebar list and the marker effect key off
+   `displayedCourts`, so they can't desync. `CourtList` renders the segmented
+   control, the "N hidden — Show all" escape, and an empty-filtered state.
 
-This refactor also unlocks the previously-deferred **open-now filter** and
-**sort** controls, which have the same desync root cause. Treat Phase 2 as "make
-filtering safe for the whole sidebar," not just amenities.
+Scope was kept deliberately narrow: indoor/outdoor only (the least error-prone
+inferences), single-select. The same `displayedCourts` seam still unlocks the
+deferred **open-now filter** and **distance/rating sort** controls — they layer
+on top without rework.
 
 ## Testing
 
@@ -117,13 +128,18 @@ filtering safe for the whole sidebar," not just amenities.
   than no label. Default to high-confidence only; make tags visibly "best
   guess."
 - **Filtering can hide real results.** A user filtering "indoor" could lose a
-  court we simply failed to tag. Consider an "includes untagged" escape or keep
-  filtering opt-in with a clear count of hidden results.
+  court we simply failed to tag. *Handled:* the filter shows a "N courts hidden
+  by filter — Show all" line (and an empty-filtered state with the same clear),
+  so a guess never silently drops a real result, and it's one tap to undo.
 - **Billing.** Richer fields cost more; keep within the daily quota caps.
 
-## Recommendation
+## Follow-ups (not built)
 
-Ship **Phase 1 (badges, high-confidence only)** as the next increment — it's
-cheap, safe, and immediately useful — and schedule the `displayedCourts`
-refactor (Phase 2) as the unlock for amenities filtering **and** the deferred
-open-now/sort controls together.
+The `displayedCourts` seam is in place, so these layer on without rework:
+
+- **Open-now filter** and **distance/rating sort** controls.
+- **Multi-select / more tags** (lighted, free) if the indoor/outdoor filter
+  proves valuable — kept out of scope for now to avoid compounding weak guesses.
+- **Richer per-place fields** (`editorialSummary`, `reviews`) to strengthen the
+  heuristic — gated behind a deliberate decision because of the Places SKU cost
+  (see `CLAUDE.md` → "Billing & quota safeguards").
