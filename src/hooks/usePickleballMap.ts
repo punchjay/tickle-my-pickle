@@ -5,6 +5,9 @@ import { palette } from '../theme'
 import { errors, searchQuery, unknownCourt } from '../appData'
 
 const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
+// The .env.example placeholder; treat it as "no key" so dev without a real key
+// shows the friendly missing-key error instead of failing Maps calls.
+const hasApiKey = !!apiKey && apiKey !== 'YOUR_KEY_HERE'
 
 // Map ID required by AdvancedMarkerElement. A real Cloud-styled Map ID
 // (VITE_GOOGLE_MAPS_MAP_ID) applies the retro map theme — see docs/map-style.json
@@ -17,8 +20,16 @@ const SEARCH_RADIUS_METERS = 16093 // ~10 miles
 
 // Configure the loader once at module load. Calling setOptions() more than
 // once warns, and StrictMode re-runs the init effect in dev.
-if (apiKey && apiKey !== 'YOUR_KEY_HERE') {
+if (hasApiKey) {
   setOptions({ key: apiKey, v: 'weekly' })
+}
+
+// A map marker paired with the court it represents, so selection and re-skinning
+// match on court identity (id) rather than array position — the displayed list
+// can be filtered or reordered without the pins drifting out of sync.
+interface CourtMarker {
+  court: Court
+  marker: google.maps.marker.AdvancedMarkerElement
 }
 
 // Numbered map pin. The selected court gets the dark "midnight" treatment at a
@@ -37,7 +48,11 @@ function makePin(index: number, selected: boolean) {
 export function usePickleballMap() {
   const mapDivRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<google.maps.Map | null>(null)
-  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([])
+  const markersRef = useRef<CourtMarker[]>([])
+  // Latest selection id, read when (re)building markers so a rebuild triggered
+  // by a list change paints the right pin without waiting on the selection
+  // effect. Kept in a ref so the build effect needn't depend on selectedCourt.
+  const selectedIdRef = useRef<string | null>(null)
 
   const [courts, setCourts] = useState<Court[]>([])
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null)
@@ -49,12 +64,16 @@ export function usePickleballMap() {
   const [searchSeq, setSearchSeq] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(() =>
-    !apiKey || apiKey === 'YOUR_KEY_HERE' ? errors.missingApiKey : null,
+    hasApiKey ? null : errors.missingApiKey,
   )
   const [mapsReady, setMapsReady] = useState(false)
 
   useEffect(() => {
-    if (!apiKey || apiKey === 'YOUR_KEY_HERE') return
+    if (!hasApiKey) return
+    // Async init: a StrictMode remount (dev) tears this effect down mid-load, so
+    // bail on cleanup, and only ever build one Map per div even if both passes
+    // resolve.
+    let cancelled = false
 
     Promise.all([
       importLibrary('maps'),
@@ -63,7 +82,7 @@ export function usePickleballMap() {
       importLibrary('marker'),
     ])
       .then(() => {
-        if (!mapDivRef.current) return
+        if (cancelled || mapRef.current || !mapDivRef.current) return
         mapRef.current = new google.maps.Map(mapDivRef.current, {
           center: { lat: 39.8283, lng: -98.5795 },
           zoom: 4,
@@ -75,15 +94,12 @@ export function usePickleballMap() {
         setMapsReady(true)
       })
       .catch(() => {
-        setError(errors.mapsLoadFailed)
+        if (!cancelled) setError(errors.mapsLoadFailed)
       })
-  }, [])
 
-  const clearMarkers = useCallback(() => {
-    markersRef.current.forEach((m) => {
-      m.map = null
-    })
-    markersRef.current = []
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const searchNearby = useCallback(
@@ -122,7 +138,6 @@ export function usePickleballMap() {
         })
 
         if (!places || places.length === 0) {
-          clearMarkers()
           setCourts([])
           setLoading(false)
           setError(errors.noCourtsFound)
@@ -147,50 +162,66 @@ export function usePickleballMap() {
           })),
         )
 
-        // Recenter and re-pin the map while it's still faded out, so the jump
-        // to the new location is hidden, then fade everything back in.
-        clearMarkers()
+        // Recenter while the map is still faded out, so the jump to the new
+        // location is hidden, then publish the results (the marker effect
+        // re-pins) and fade everything back in.
         map.setCenter(location)
         map.setZoom(12)
         setCourts(results)
         setSearchSeq((n) => n + 1)
-        const { AdvancedMarkerElement } = google.maps.marker
-        results.forEach((court, i) => {
-          const marker = new AdvancedMarkerElement({
-            map,
-            position: court.location,
-            title: court.name,
-            content: makePin(i, false),
-            gmpClickable: true,
-          })
-          marker.addEventListener('gmp-click', () => setSelectedCourt(court))
-          markersRef.current.push(marker)
-        })
         setMapShown(true)
       } catch (err) {
         console.error('Places searchByText failed:', err)
-        clearMarkers()
         setCourts([])
         setError(errors.searchFailed)
       } finally {
         setLoading(false)
       }
     },
-    [clearMarkers],
+    [],
   )
 
-  // Re-skin the pins whenever the selection changes so the chosen court reads
-  // as "active" on the map, mirroring the highlighted card in the sidebar. The
-  // marker order matches `courts`, so index → court. Guarded on having markers
-  // (only true after a search, by which point the marker library has loaded).
+  // Markers are a pure function of the displayed court list: tear down the old
+  // pins and re-create them in list order whenever `courts` changes, so the
+  // numbered glyphs always match the sidebar even once the list is filtered or
+  // reordered. Each pin reflects the current selection (via the ref) at build
+  // time. Guarded on having a map + results — true only after a search, by
+  // which point the marker library has loaded.
   useEffect(() => {
-    if (markersRef.current.length === 0) return
-    markersRef.current.forEach((marker, i) => {
-      const selected = courts[i] === selectedCourt
+    markersRef.current.forEach(({ marker }) => {
+      marker.map = null
+    })
+    markersRef.current = []
+
+    const map = mapRef.current
+    if (!map || courts.length === 0) return
+
+    const { AdvancedMarkerElement } = google.maps.marker
+    markersRef.current = courts.map((court, i) => {
+      const marker = new AdvancedMarkerElement({
+        map,
+        position: court.location,
+        title: court.name,
+        content: makePin(i, court.id === selectedIdRef.current),
+        gmpClickable: true,
+      })
+      marker.addEventListener('gmp-click', () => setSelectedCourt(court))
+      return { court, marker }
+    })
+  }, [courts])
+
+  // Re-skin the pins in place whenever the selection changes so the chosen
+  // court reads as "active" on the map, mirroring the highlighted sidebar card.
+  // Match on court id (not array position) so a filtered/reordered list stays
+  // correct. Also keep selectedIdRef current for the marker-build effect above.
+  useEffect(() => {
+    selectedIdRef.current = selectedCourt?.id ?? null
+    markersRef.current.forEach(({ court, marker }, i) => {
+      const selected = court.id === selectedCourt?.id
       marker.content = makePin(i, selected)
       marker.zIndex = selected ? 1 : null
     })
-  }, [selectedCourt, courts])
+  }, [selectedCourt])
 
   const handleSearch = useCallback(
     (query: string) => {
