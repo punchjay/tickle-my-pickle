@@ -14,7 +14,7 @@ const Footer = () => {
     <Wrapper>
       © {new Date().getFullYear()} {app.wordmark} |{' '}
       <FooterLink href={`mailto:${footer.email}?subject=Hello!`}>
-        {footer.email}
+        {footer.contactLabel}
       </FooterLink>
       <FooterLink
         href={footer.githubUrl}
