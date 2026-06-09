@@ -41,6 +41,7 @@ export const amenities = {
 
 export const footer = {
   email: 'punchjay@gmail.com',
+  contactLabel: 'Get in touch',
   githubUrl: 'https://github.com/punchjay',
   githubLabel: 'GitHub profile',
 } as const

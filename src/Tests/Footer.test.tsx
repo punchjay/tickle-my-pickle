@@ -15,10 +15,13 @@ describe('Footer', () => {
     ).toBeInTheDocument()
   })
 
-  it('links the email via mailto', () => {
+  it('links the contact message via mailto', () => {
     render(<Footer />)
-    const email = screen.getByRole('link', { name: footer.email })
-    expect(email).toHaveAttribute('href', `mailto:${footer.email}?subject=Hello!`)
+    const contact = screen.getByRole('link', { name: footer.contactLabel })
+    expect(contact).toHaveAttribute(
+      'href',
+      `mailto:${footer.email}?subject=Hello!`,
+    )
   })
 
   it('links the GitHub profile in a new tab', () => {
