@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.5.0...tickle-my-pickle-app-v1.6.0) (2026-06-09)
+
+
+### Features
+
+* show a contact message instead of the email in the footer ([#82](https://github.com/punchjay/tickle-my-pickle/issues/82)) ([286722f](https://github.com/punchjay/tickle-my-pickle/commit/286722fe3ac56df7b96b4ba4fe7059d6e5c00848))
+
 ## [1.5.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.4.0...tickle-my-pickle-app-v1.5.0) (2026-06-07)
 
 
