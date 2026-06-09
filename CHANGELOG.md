@@ -7,11 +7,6 @@
 
 * show a contact message instead of the email in the footer ([#82](https://github.com/punchjay/tickle-my-pickle/issues/82)) ([286722f](https://github.com/punchjay/tickle-my-pickle/commit/286722fe3ac56df7b96b4ba4fe7059d6e5c00848))
 
-
-### Bug Fixes
-
-* prevent text selection on the "Near me" button ([#79](https://github.com/punchjay/tickle-my-pickle/issues/79)) ([99db1ee](https://github.com/punchjay/tickle-my-pickle/commit/99db1eeddd47dc15d5cee9e3a767434998774272))
-
 ## [1.5.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.4.0...tickle-my-pickle-app-v1.5.0) (2026-06-07)
 
 
