@@ -84,9 +84,6 @@ export const NearMeButton = styled.button`
   color: var(--pf-link);
   white-space: nowrap;
   cursor: pointer;
-  /* Don't let a click (or double-click) highlight the "Near me" label. */
-  user-select: none;
-  -webkit-user-select: none;
   transition: background 0.15s;
 
   &:hover:not(:disabled) {
