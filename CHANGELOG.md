@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.6.0...tickle-my-pickle-app-v1.6.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* build map pins before the fade-in paints and re-skin only changed pins ([#84](https://github.com/punchjay/tickle-my-pickle/issues/84)) ([9a9b7b7](https://github.com/punchjay/tickle-my-pickle/commit/9a9b7b7c37983f51a16c23a0cba663a83051e57b))
+
 ## [1.6.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.5.0...tickle-my-pickle-app-v1.6.0) (2026-06-09)
 
 
