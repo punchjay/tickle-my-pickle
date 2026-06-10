@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from 'react'
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 import type { Court } from '../types'
 import { palette } from '../theme'
@@ -24,14 +31,6 @@ if (hasApiKey) {
   setOptions({ key: apiKey, v: 'weekly' })
 }
 
-// A map marker paired with the court it represents, so selection and re-skinning
-// match on court identity (id) rather than array position — the displayed list
-// can be filtered or reordered without the pins drifting out of sync.
-interface CourtMarker {
-  court: Court
-  marker: google.maps.marker.AdvancedMarkerElement
-}
-
 // Numbered map pin. The selected court gets the dark "midnight" treatment at a
 // larger scale so it stands out from the terracotta crowd. Only called after
 // the marker library has loaded.
@@ -48,14 +47,22 @@ function makePin(index: number, selected: boolean) {
 export function usePickleballMap() {
   const mapDivRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<google.maps.Map | null>(null)
-  const markersRef = useRef<CourtMarker[]>([])
-  // Latest selection id, read when (re)building markers so a rebuild triggered
-  // by a list change paints the right pin without waiting on the selection
-  // effect. Kept in a ref so the build effect needn't depend on selectedCourt.
-  const selectedIdRef = useRef<string | null>(null)
+  // Markers mirror `courts` by index (both rebuilt together by the effect
+  // below), so position i is always the pin for courts[i].
+  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([])
+  // The selection id the marker DOM currently shows — owned by the two marker
+  // effects so the re-skin pass can touch only the pins that actually changed.
+  const paintedIdRef = useRef<string | null>(null)
 
   const [courts, setCourts] = useState<Court[]>([])
-  const [selectedCourt, setSelectedCourt] = useState<Court | null>(null)
+  // Selection is stored as the court's id; the Court object consumers receive
+  // is derived from the current list, so a rebuilt/filtered list can never
+  // disagree with the selection state.
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const selectedCourt = useMemo(
+    () => courts.find((c) => c.id === selectedId) ?? null,
+    [courts, selectedId],
+  )
   // Drives the map's opacity fade independently of `courts`: the map fades out
   // while a (re-)search runs and fades back in once new results land.
   const [mapShown, setMapShown] = useState(false)
@@ -108,7 +115,7 @@ export function usePickleballMap() {
       if (!map) return
       setLoading(true)
       setError(null)
-      setSelectedCourt(null)
+      setSelectedId(null)
       // Fade the map out while the new location loads. Previous results are
       // intentionally kept until the new ones land, so the overlay (driven by
       // courts.length) stays pinned to the top during a re-search instead of
@@ -184,14 +191,18 @@ export function usePickleballMap() {
   // Markers are a pure function of the displayed court list: tear down the old
   // pins and re-create them in list order whenever `courts` changes, so the
   // numbered glyphs always match the sidebar even once the list is filtered or
-  // reordered. Each pin reflects the current selection (via the ref) at build
-  // time. Guarded on having a map + results — true only after a search, by
-  // which point the marker library has loaded.
-  useEffect(() => {
-    markersRef.current.forEach(({ marker }) => {
+  // reordered. A layout effect so the pins exist before the browser paints the
+  // same commit's mapShown fade-in — they're revealed by the fade, not popped
+  // in after it starts. Pins are built unselected; the selection effect below
+  // runs next in the same flush and skins the selected one before paint.
+  // Guarded on having a map + results — true only after a search, by which
+  // point the marker library has loaded.
+  useLayoutEffect(() => {
+    markersRef.current.forEach((marker) => {
       marker.map = null
     })
     markersRef.current = []
+    paintedIdRef.current = null
 
     const map = mapRef.current
     if (!map || courts.length === 0) return
@@ -202,26 +213,33 @@ export function usePickleballMap() {
         map,
         position: court.location,
         title: court.name,
-        content: makePin(i, court.id === selectedIdRef.current),
+        content: makePin(i, false),
         gmpClickable: true,
       })
-      marker.addEventListener('gmp-click', () => setSelectedCourt(court))
-      return { court, marker }
+      marker.addEventListener('gmp-click', () => setSelectedId(court.id))
+      return marker
     })
   }, [courts])
 
-  // Re-skin the pins in place whenever the selection changes so the chosen
-  // court reads as "active" on the map, mirroring the highlighted sidebar card.
-  // Match on court id (not array position) so a filtered/reordered list stays
-  // correct. Also keep selectedIdRef current for the marker-build effect above.
-  useEffect(() => {
-    selectedIdRef.current = selectedCourt?.id ?? null
-    markersRef.current.forEach(({ court, marker }, i) => {
-      const selected = court.id === selectedCourt?.id
+  // Re-skin pins when the selection changes so the chosen court reads as
+  // "active" on the map, mirroring the highlighted sidebar card. Diffs against
+  // what the marker DOM currently shows (paintedIdRef) and rebuilds only the
+  // pins that changed — at most two — instead of all of them. Also depends on
+  // `courts`: a list change rebuilds the markers unselected (above), so this
+  // pass re-applies the selection to the fresh pins.
+  useLayoutEffect(() => {
+    const prevId = paintedIdRef.current
+    if (prevId === selectedId) return
+    paintedIdRef.current = selectedId
+    courts.forEach((court, i) => {
+      if (court.id !== prevId && court.id !== selectedId) return
+      const marker = markersRef.current[i]
+      if (!marker) return
+      const selected = court.id === selectedId
       marker.content = makePin(i, selected)
       marker.zIndex = selected ? 1 : null
     })
-  }, [selectedCourt])
+  }, [courts, selectedId])
 
   const handleSearch = useCallback(
     (query: string) => {
@@ -261,7 +279,7 @@ export function usePickleballMap() {
   }, [mapsReady, searchNearby])
 
   const handleCourtSelect = useCallback((court: Court) => {
-    setSelectedCourt(court)
+    setSelectedId(court.id)
     mapRef.current?.panTo(court.location)
   }, [])
 
