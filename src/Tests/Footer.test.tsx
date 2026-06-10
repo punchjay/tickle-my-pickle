@@ -20,7 +20,7 @@ describe('Footer', () => {
     const contact = screen.getByRole('link', { name: footer.contactLabel })
     expect(contact).toHaveAttribute(
       'href',
-      `mailto:${footer.email}?subject=Hello!`,
+      `mailto:${footer.email}?subject=${footer.emailSubject}`,
     )
   })
 
