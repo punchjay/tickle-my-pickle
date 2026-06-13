@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.6.1...tickle-my-pickle-app-v1.7.0) (2026-06-13)
+
+
+### Features
+
+* load the Google Maps SDK lazily on first search-pill interaction ([#86](https://github.com/punchjay/tickle-my-pickle/issues/86)) ([e57a359](https://github.com/punchjay/tickle-my-pickle/commit/e57a359b71922dbf297fa0ed7b1258392eefe23c))
+
 ## [1.6.1](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.6.0...tickle-my-pickle-app-v1.6.1) (2026-06-10)
 
 
