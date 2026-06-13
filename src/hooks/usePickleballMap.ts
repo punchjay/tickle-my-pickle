@@ -53,6 +53,12 @@ export function usePickleballMap() {
   // The selection id the marker DOM currently shows — owned by the two marker
   // effects so the re-skin pass can touch only the pins that actually changed.
   const paintedIdRef = useRef<string | null>(null)
+  // A search/geolocate requested before the SDK finished loading. Held here and
+  // replayed by the effect below once `mapsReady` flips true, so a fast user who
+  // submits right after focusing isn't silently dropped.
+  const pendingRef = useRef<
+    { kind: 'search'; query: string } | { kind: 'geolocate' } | null
+  >(null)
 
   const [courts, setCourts] = useState<Court[]>([])
   // Selection is stored as the court's id; the Court object consumers receive
@@ -74,9 +80,17 @@ export function usePickleballMap() {
     hasApiKey ? null : errors.missingApiKey,
   )
   const [mapsReady, setMapsReady] = useState(false)
+  // The map (and the whole Maps SDK) doesn't load on mount — it loads lazily the
+  // first time the user activates the search pill (focus or click), so the app's
+  // first paint has no map churning under the backdrop. `loadFailed` is terminal
+  // and re-disables the input (the only case where !mapsReady should still gate).
+  const [activated, setActivated] = useState(false)
+  const [loadFailed, setLoadFailed] = useState(false)
+
+  const activateMaps = useCallback(() => setActivated(true), [])
 
   useEffect(() => {
-    if (!hasApiKey) return
+    if (!hasApiKey || !activated) return
     // Async init: a StrictMode remount (dev) tears this effect down mid-load, so
     // bail on cleanup, and only ever build one Map per div even if both passes
     // resolve.
@@ -101,13 +115,17 @@ export function usePickleballMap() {
         setMapsReady(true)
       })
       .catch(() => {
-        if (!cancelled) setError(errors.mapsLoadFailed)
+        if (cancelled) return
+        setError(errors.mapsLoadFailed)
+        setLoadFailed(true)
+        setLoading(false)
+        pendingRef.current = null
       })
 
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [activated])
 
   const searchNearby = useCallback(
     async (location: google.maps.LatLngLiteral) => {
@@ -241,11 +259,10 @@ export function usePickleballMap() {
     })
   }, [courts, selectedId])
 
-  const handleSearch = useCallback(
+  // The actual geocode + search; only safe to call once `mapsReady` (the
+  // geocoding library is loaded by then). Callers set loading/error first.
+  const runSearch = useCallback(
     (query: string) => {
-      if (!mapsReady) return
-      setLoading(true)
-      setError(null)
       const geocoder = new google.maps.Geocoder()
       geocoder.geocode(
         { address: query, componentRestrictions: { country: 'US' } },
@@ -260,13 +277,10 @@ export function usePickleballMap() {
         },
       )
     },
-    [mapsReady, searchNearby],
+    [searchNearby],
   )
 
-  const handleGeolocate = useCallback(() => {
-    if (!mapsReady) return
-    setLoading(true)
-    setError(null)
+  const runGeolocate = useCallback(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) =>
         searchNearby({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
@@ -276,7 +290,46 @@ export function usePickleballMap() {
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
     )
-  }, [mapsReady, searchNearby])
+  }, [searchNearby])
+
+  // Replay a request that arrived before the SDK was ready, once it is.
+  useEffect(() => {
+    if (!mapsReady) return
+    const pending = pendingRef.current
+    if (!pending) return
+    pendingRef.current = null
+    if (pending.kind === 'search') runSearch(pending.query)
+    else runGeolocate()
+  }, [mapsReady, runSearch, runGeolocate])
+
+  const handleSearch = useCallback(
+    (query: string) => {
+      if (!hasApiKey || loadFailed) return
+      setLoading(true)
+      setError(null)
+      // Not loaded yet (e.g. the user submitted moments after focusing): queue
+      // the request and kick off the lazy load — the effect above runs it.
+      if (!mapsReady) {
+        pendingRef.current = { kind: 'search', query }
+        setActivated(true)
+        return
+      }
+      runSearch(query)
+    },
+    [mapsReady, loadFailed, runSearch],
+  )
+
+  const handleGeolocate = useCallback(() => {
+    if (!hasApiKey || loadFailed) return
+    setLoading(true)
+    setError(null)
+    if (!mapsReady) {
+      pendingRef.current = { kind: 'geolocate' }
+      setActivated(true)
+      return
+    }
+    runGeolocate()
+  }, [mapsReady, loadFailed, runGeolocate])
 
   const handleCourtSelect = useCallback((court: Court) => {
     setSelectedId(court.id)
@@ -292,6 +345,12 @@ export function usePickleballMap() {
     loading,
     error,
     mapsReady,
+    // `hasApiKey` is a module constant; surfaced so the page can disable the
+    // input when there's no key (the only hard-blocked state besides loadFailed).
+    hasApiKey,
+    activated,
+    loadFailed,
+    activateMaps,
     handleSearch,
     handleGeolocate,
     handleCourtSelect,

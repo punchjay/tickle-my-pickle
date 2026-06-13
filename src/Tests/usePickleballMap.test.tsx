@@ -113,6 +113,8 @@ afterEach(() => {
 
 async function renderReady() {
   render(<Harness />)
+  // The map now loads lazily on activation (focus/click), not on mount.
+  act(() => hookApi.activateMaps())
   await waitFor(() => expect(hookApi.mapsReady).toBe(true))
 }
 
@@ -122,6 +124,27 @@ async function runSearch(zip = '90210') {
 }
 
 describe('usePickleballMap', () => {
+  it('does not load the map until activated', async () => {
+    render(<Harness />)
+    // Without activation the init effect bails, so the SDK never loads.
+    await Promise.resolve()
+    expect(hookApi.mapsReady).toBe(false)
+
+    act(() => hookApi.activateMaps())
+    await waitFor(() => expect(hookApi.mapsReady).toBe(true))
+  })
+
+  it('queues a search submitted before the map is ready and runs it once loaded', async () => {
+    render(<Harness />)
+    // Fire a search before activating: it should self-activate, queue, then run.
+    act(() => hookApi.handleSearch('90210'))
+    await waitFor(() => expect(hookApi.loading).toBe(false))
+
+    expect(hookApi.mapsReady).toBe(true)
+    expect(hookApi.courts).toHaveLength(1)
+    expect(hookApi.error).toBeNull()
+  })
+
   it('geocodes a zip, searches, and maps Places into Courts', async () => {
     searchByTextImpl = () =>
       Promise.resolve({

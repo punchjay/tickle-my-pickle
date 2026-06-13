@@ -55,15 +55,19 @@ const NearMeIcon = () => {
 interface Props {
   onSearch: (query: string) => void
   onGeolocate: () => void
+  // Fired the first time the user engages the pill (focus or click), so the
+  // page can lazily start loading the Maps SDK only on intent.
+  onActivate?: () => void
   loading: boolean
   disabled: boolean
-  // Maps SDK still loading on first mount — spin the icon to signal "not yet".
+  // Maps SDK still loading — spin the icon to signal "not yet".
   initializing?: boolean
 }
 
 const LocationInput = ({
   onSearch,
   onGeolocate,
+  onActivate,
   loading,
   disabled,
   initializing = false,
@@ -85,7 +89,9 @@ const LocationInput = ({
   }
 
   return (
-    <Wrapper>
+    // Pointer-down + focus (capture) cover both a click and a keyboard tab into
+    // any control in the pill; onActivate is idempotent so firing both is fine.
+    <Wrapper onPointerDownCapture={onActivate} onFocusCapture={onActivate}>
       <SearchForm onSubmit={handleSubmit}>
         <IconButton
           type="submit"
