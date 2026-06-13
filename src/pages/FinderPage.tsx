@@ -25,6 +25,10 @@ const FinderPage = () => {
     loading,
     error,
     mapsReady,
+    hasApiKey,
+    activated,
+    loadFailed,
+    activateMaps,
     handleSearch,
     handleGeolocate,
     handleCourtSelect,
@@ -46,9 +50,10 @@ const FinderPage = () => {
         <LocationInput
           onSearch={handleSearch}
           onGeolocate={handleGeolocate}
+          onActivate={activateMaps}
           loading={loading}
-          disabled={!mapsReady}
-          initializing={!mapsReady && !error}
+          disabled={!hasApiKey || loadFailed}
+          initializing={activated && !mapsReady && !error}
         />
         {error && (
           <ErrorBanner role="alert" aria-live="assertive">
