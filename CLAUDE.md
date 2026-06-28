@@ -29,6 +29,41 @@ React 19 + TypeScript 6 + Vite 8 + styled-components v6 + React Router v7. Entry
 
 Pickleball court finder. User enters a free-text location (city, ZIP, or neighborhood) or uses browser geolocation; the app geocodes the location and runs a Google Maps Places text search ("pickleball court", ~10-mile location bias), drops numbered markers on the map, and shows a scrollable sidebar of results with name, address, rating, open/closed status, and a "Directions" link (opens Google Maps turn-by-turn in a new tab). Selecting a court — by clicking its card or its pin — highlights the card, scrolls it into view, pans the map, and emphasizes that pin. Each card has a star to **save** the court; the sidebar has **Nearby** / **Saved** tabs, and favorites persist across sessions in `localStorage` (`useFavorites`). Note: the Saved tab lives inside the results sidebar, so it's reachable after a search; a pre-search favorites entry point is a documented follow-up. Court cards also show inferred **amenity badges** (indoor/outdoor/lighted/free) — heuristically derived from the listing name and Place `types` (`amenities.ts`), since the Places API carries no structured amenity signal; only high-confidence guesses show by default. See `docs/amenities-tagging-plan.md`.
 
+## Feature backlog / TODO
+
+Candidate work, not yet scheduled. Detailed designs live in `docs/` where noted.
+
+- **`displayedCourts` refactor → filtering & sorting** — central source-of-truth
+  array for both sidebar and map markers; unlocks amenity filters, sort-by-rating,
+  distance sort, and an open-now filter in one stroke. Gating dependency for the
+  next two. See `docs/amenities-tagging-plan.md` (Phase 2).
+- **Distance display & sort** — haversine from search center using
+  `Court.location`; show miles on cards. No new API calls.
+- **Pre-search favorites entry point** — Saved courts are only reachable after a
+  search today; add a Saved entry point on the pre-search canvas.
+- **Shareable search URLs** — encode the location query (`/?q=Austin`) so searches
+  are bookmarkable/shareable.
+- **Next.js migration (scoped, not committed)** — the app is a pure client-side
+  SPA, so this is mostly a framework/tooling swap unless server features are
+  wanted. Shape if pursued:
+  - Routing: `App.tsx`/`main.tsx`/`BrowserRouter` → file-based `app/page.tsx`
+    (FinderPage), `app/not-found.tsx`, `app/layout.tsx`; `react-router-dom` `Link`
+    → `next/link`; `basename` → `basePath`. Next's static export emits its own
+    `404.html`, so the `public/404.html` + `index.html` SPA shim is deleted.
+  - styled-components SSR: add the registry pattern (`useServerInsertedHTML` + SWC
+    `styledComponents` compiler flag); move `GlobalStyle` into `layout.tsx`. The
+    `--pf-*` CSS-vars approach (no ThemeProvider) eases this.
+  - `'use client'` on the client modules (map hook, favorites, styled-components);
+    guard `useFavorites`' `localStorage` initializer with `typeof window`.
+  - Env: `VITE_*` → `NEXT_PUBLIC_*` (two `import.meta.env` reads in
+    `usePickleballMap.ts` → `process.env.*`); update `.env.example` + `deploy.yml`.
+  - Tooling: move Vitest config out of `vite.config.ts` into `vitest.config.ts`;
+    rewrite/drop the `MemoryRouter` routing tests (`App.test.tsx`,
+    `NotFoundPage.styles.test.tsx`); the other 13 test files are unaffected.
+  - Hosting fork: static export keeps GitHub Pages but gives no API
+    routes/SSR/image-opt. Server features (hide the Maps key behind a route,
+    SSR SEO/metadata, future backend) require moving to a Node host (e.g. Vercel).
+
 ## Environment
 
 Requires `VITE_GOOGLE_MAPS_API_KEY` in `.env.local` (gitignored). See `.env.example`. The Google Cloud project needs **Maps JavaScript API**, **Places API (New)**, and **Geocoding API** enabled. The key is website-restricted; because GitHub Pages sends an origin-only referer, the prod referer pattern must be `https://punchjay.github.io/*` (an origin, not a subpath).
