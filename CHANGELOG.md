@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.7.0...tickle-my-pickle-app-v1.8.0) (2026-07-06)
+
+
+### Features
+
+* match selected court-card number color to its map pin ([#97](https://github.com/punchjay/tickle-my-pickle/issues/97)) ([c97b6d9](https://github.com/punchjay/tickle-my-pickle/commit/c97b6d9410300e517808d28d794f44e2c691b93a))
+
 ## [1.7.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.6.1...tickle-my-pickle-app-v1.7.0) (2026-06-13)
 
 
