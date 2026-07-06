@@ -15,8 +15,24 @@ concurrency:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    env:
+      PAT: ${{ secrets.RELEASE_PLEASE_PAT }}
     steps:
       - uses: googleapis/release-please-action@v5
+        id: release
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+      # Auto-merge the release PR so a version ships on every feature/fix merge.
+      # The merge MUST use a non-GITHUB_TOKEN identity (a PAT): GitHub does not
+      # trigger new workflow runs from GITHUB_TOKEN actions, so a GITHUB_TOKEN
+      # merge would neither re-run release-please (to cut the tag/release) nor
+      # run CI on the merge commit (which is what gates the Pages deploy).
+      # --admin bypasses the never-reporting `verify` check + the up-to-date
+      # requirement. Skips cleanly when the secret is absent (falls back to a
+      # manual `gh pr merge --squash --admin`).
+      - name: Auto-merge the release PR
+        if: ${{ steps.release.outputs.prs_created == 'true' && env.PAT != '' }}
+        env:
+          GH_TOKEN: ${{ env.PAT }}
+        run: gh pr merge --squash --admin "${{ fromJson(steps.release.outputs.pr).number }}"
