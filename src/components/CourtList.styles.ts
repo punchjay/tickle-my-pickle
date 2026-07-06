@@ -121,7 +121,7 @@ export const CourtNum = styled.span<ItemProps>`
   height: 22px;
   border-radius: 50%;
   background: ${({ $selected }) =>
-    $selected ? 'var(--pf-primary-hover)' : 'var(--pf-primary)'};
+    $selected ? 'var(--pf-midnight)' : 'var(--pf-primary)'};
   color: var(--pf-card);
   font-size: 0.6875rem;
   font-weight: 700;
