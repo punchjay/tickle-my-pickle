@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.1](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.8.0...tickle-my-pickle-app-v1.8.1) (2026-07-08)
+
+
+### Bug Fixes
+
+* **tests:** provide in-memory localStorage in test setup ([#101](https://github.com/punchjay/tickle-my-pickle/issues/101)) ([5bfe954](https://github.com/punchjay/tickle-my-pickle/commit/5bfe9547d0ddaed8e91a456353f0015b219ab4b2))
+
 ## [1.8.0](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.7.0...tickle-my-pickle-app-v1.8.0) (2026-07-06)
 
 
