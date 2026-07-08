@@ -72,7 +72,10 @@ function installGoogle() {
       Map: FakeMap,
       Geocoder: FakeGeocoder,
       places: { Place: { searchByText: () => searchByTextImpl() } },
-      marker: { AdvancedMarkerElement: FakeAdvancedMarker, PinElement: FakePin },
+      marker: {
+        AdvancedMarkerElement: FakeAdvancedMarker,
+        PinElement: FakePin,
+      },
     },
   }
   ;(globalThis as { google?: unknown }).google = mock
@@ -102,7 +105,10 @@ beforeEach(async () => {
   installGoogle()
   // Sensible defaults; individual tests override as needed.
   geocodeImpl = (_req, cb) =>
-    cb([{ geometry: { location: { lat: () => 39.78, lng: () => -89.65 } } }], 'OK')
+    cb(
+      [{ geometry: { location: { lat: () => 39.78, lng: () => -89.65 } } }],
+      'OK',
+    )
   searchByTextImpl = () => Promise.resolve({ places: [makePlace()] })
   ;({ usePickleballMap: useHook } = await import('@/hooks/usePickleballMap'))
 })

@@ -53,9 +53,13 @@ describe('FinderPage.styles', () => {
   })
 
   it('Tagline renders a p', () => {
-    const { container } = render(<Tagline>Find pickleball courts near you</Tagline>)
+    const { container } = render(
+      <Tagline>Find pickleball courts near you</Tagline>,
+    )
     expect(container.firstChild?.nodeName).toBe('P')
-    expect(container.firstChild).toHaveTextContent('Find pickleball courts near you')
+    expect(container.firstChild).toHaveTextContent(
+      'Find pickleball courts near you',
+    )
   })
 
   it('VisuallyHiddenTitle renders an h1', () => {
@@ -67,7 +71,9 @@ describe('FinderPage.styles', () => {
   })
 
   it('ErrorBanner renders a p', () => {
-    const { container } = render(<ErrorBanner>Something went wrong</ErrorBanner>)
+    const { container } = render(
+      <ErrorBanner>Something went wrong</ErrorBanner>,
+    )
     expect(container.firstChild?.nodeName).toBe('P')
     expect(container.firstChild).toHaveTextContent('Something went wrong')
   })
