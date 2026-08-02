@@ -183,7 +183,7 @@ Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Fiftee
 
 `.github/workflows/release-please.yml` automates releases: it opens/updates a release PR aggregating Conventional Commits on `main`; merging that PR cuts the tag + GitHub release and bumps `package.json`/`CHANGELOG.md`. Config in `release-please-config.json` + `.release-please-manifest.json`. Release PRs are **auto-merged** — the workflow's `Auto-merge the release PR` step merges the freshly-opened release PR with `gh pr merge --squash --admin`, so a version ships on every feature/fix merge without a manual step. That merge uses a **`RELEASE_PLEASE_PAT`** secret (a fine-grained PAT with Contents + Pull-requests read/write), **not** the default `GITHUB_TOKEN`: GitHub won't trigger new workflow runs from `GITHUB_TOKEN` actions, so a `GITHUB_TOKEN` merge would neither re-run release-please to cut the tag/release nor run CI on the merge commit (which gates the Pages deploy). The `--admin` flag is needed because release-please's own PRs are created by `GITHUB_TOKEN`, so CI does **not** run on them and the required `verify` check never reports. If the `RELEASE_PLEASE_PAT` secret is absent the auto-merge step skips cleanly and you merge the release PR by hand with `gh pr merge <num> --squash --admin`.
 
-Dependabot (`.github/dependabot.yml`) opens grouped weekly npm + actions update PRs.
+There is **no Dependabot** in this repo — dependency updates are done by hand (`npm outdated` → bump → PR). It was removed deliberately; don't re-add `.github/dependabot.yml`.
 
 ## Claude API
 
