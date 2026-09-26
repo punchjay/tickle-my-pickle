@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.2](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.8.1...tickle-my-pickle-app-v1.8.2) (2026-09-26)
+
+
+### Bug Fixes
+
+* **deps:** resolve npm audit vulnerabilities and update dependencies ([#113](https://github.com/punchjay/tickle-my-pickle/issues/113)) ([c698472](https://github.com/punchjay/tickle-my-pickle/commit/c698472d45c0cd2070e350aadb291319ce1fdcf2))
+
 ## [1.8.1](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.8.0...tickle-my-pickle-app-v1.8.1) (2026-07-08)
 
 
