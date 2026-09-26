@@ -13,6 +13,7 @@ npm run format     # Prettier on src/
 npm run preview    # preview production build locally (localhost:4173)
 npm test           # run all tests once (Vitest)
 npm run test:watch # watch mode
+npm run test:coverage # tests + v8 coverage report → coverage/ (HTML at coverage/index.html)
 ```
 
 To run a single test file:
