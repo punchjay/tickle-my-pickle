@@ -74,5 +74,13 @@ export const errors = {
   noCourtsFound: 'No pickleball courts found nearby. Try a different location.',
   searchFailed: 'Search failed. Please try again.',
   locationNotFound: 'Could not find that location. Try again.',
-  geolocationDenied: 'Location access denied. Enter a zip code instead.',
+  // One per GeolocationPositionError code, plus no-API browsers.
+  geolocationDenied:
+    'Location access is blocked. Allow it in your browser settings, or search by city or ZIP.',
+  geolocationUnavailable:
+    "Couldn't determine your location. Search by city or ZIP instead.",
+  geolocationTimeout:
+    'Finding your location took too long. Try again, or search by city or ZIP.',
+  geolocationUnsupported:
+    "This browser can't share your location. Search by city or ZIP instead.",
 } as const
