@@ -53,12 +53,18 @@ export function usePickleballMap() {
   // The selection id the marker DOM currently shows — owned by the two marker
   // effects so the re-skin pass can touch only the pins that actually changed.
   const paintedIdRef = useRef<string | null>(null)
-  // A search/geolocate requested before the SDK finished loading. Held here and
-  // replayed by the effect below once `mapsReady` flips true, so a fast user who
-  // submits right after focusing isn't silently dropped.
+  // A search requested before the SDK finished loading. Held here and replayed
+  // by the effect below once `mapsReady` flips true, so a fast user who submits
+  // right after focusing isn't silently dropped. "Near me" stashes the position
+  // it already got (never the geolocation request itself; see handleGeolocate).
   const pendingRef = useRef<
-    { kind: 'search'; query: string } | { kind: 'geolocate' } | null
+    | { kind: 'search'; query: string }
+    | { kind: 'coords'; coords: google.maps.LatLngLiteral }
+    | null
   >(null)
+  // Read from the async geolocation callback, which would otherwise see the
+  // `mapsReady` value from the click that started it.
+  const mapsReadyRef = useRef(false)
 
   const [courts, setCourts] = useState<Court[]>([])
   // Selection is stored as the court's id; the Court object consumers receive
@@ -280,17 +286,10 @@ export function usePickleballMap() {
     [searchNearby],
   )
 
-  const runGeolocate = useCallback(() => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) =>
-        searchNearby({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => {
-        setLoading(false)
-        setError(errors.geolocationDenied)
-      },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
-    )
-  }, [searchNearby])
+  // Declared before the replay effect so the ref is current when it runs.
+  useEffect(() => {
+    mapsReadyRef.current = mapsReady
+  }, [mapsReady])
 
   // Replay a request that arrived before the SDK was ready, once it is.
   useEffect(() => {
@@ -299,8 +298,8 @@ export function usePickleballMap() {
     if (!pending) return
     pendingRef.current = null
     if (pending.kind === 'search') runSearch(pending.query)
-    else runGeolocate()
-  }, [mapsReady, runSearch, runGeolocate])
+    else searchNearby(pending.coords)
+  }, [mapsReady, runSearch, searchNearby])
 
   const handleSearch = useCallback(
     (query: string) => {
@@ -321,15 +320,40 @@ export function usePickleballMap() {
 
   const handleGeolocate = useCallback(() => {
     if (!hasApiKey || loadFailed) return
-    setLoading(true)
-    setError(null)
-    if (!mapsReady) {
-      pendingRef.current = { kind: 'geolocate' }
-      setActivated(true)
+    // Missing in insecure (non-HTTPS) contexts and some embedded browsers;
+    // calling through it would throw and leave the spinner running.
+    if (!('geolocation' in navigator)) {
+      setError(errors.geolocationUnsupported)
       return
     }
-    runGeolocate()
-  }, [mapsReady, loadFailed, runGeolocate])
+    setLoading(true)
+    setError(null)
+    // Start the lazy SDK load in parallel; the position doesn't need it.
+    setActivated(true)
+    // Must run synchronously inside the click. Deferring it until the SDK
+    // loads (as #86 did) drops the user gesture, and browsers then deny or
+    // silently block the request without ever showing the prompt.
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+        if (mapsReadyRef.current) searchNearby(coords)
+        else pendingRef.current = { kind: 'coords', coords }
+      },
+      (err) => {
+        setLoading(false)
+        // Only code 1 is a real denial. Code 2 is common on macOS when the
+        // site is allowed but the browser is off in Location Services.
+        setError(
+          err.code === err.PERMISSION_DENIED
+            ? errors.geolocationDenied
+            : err.code === err.TIMEOUT
+              ? errors.geolocationTimeout
+              : errors.geolocationUnavailable,
+        )
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
+    )
+  }, [loadFailed, searchNearby])
 
   const handleCourtSelect = useCallback((court: Court) => {
     setSelectedId(court.id)

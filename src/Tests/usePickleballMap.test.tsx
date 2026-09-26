@@ -271,4 +271,119 @@ describe('usePickleballMap', () => {
     expect(hookApi.courts).toHaveLength(0)
     expect(hookApi.error).toMatch(/could not find that location/i)
   })
+
+  describe('Near me (geolocation)', () => {
+    // jsdom has no navigator.geolocation; each test installs its own.
+    function installGeolocation(
+      impl: (
+        ok: (pos: GeolocationPosition) => void,
+        fail: (err: GeolocationPositionError) => void,
+      ) => void,
+    ) {
+      Object.defineProperty(navigator, 'geolocation', {
+        configurable: true,
+        value: { getCurrentPosition: impl },
+      })
+    }
+
+    // Same shape as a real GeolocationPositionError, constants included.
+    function positionError(code: 1 | 2 | 3) {
+      return {
+        code,
+        message: '',
+        PERMISSION_DENIED: 1,
+        POSITION_UNAVAILABLE: 2,
+        TIMEOUT: 3,
+      } as GeolocationPositionError
+    }
+
+    async function runGeolocate() {
+      act(() => hookApi.handleGeolocate())
+      await waitFor(() => expect(hookApi.loading).toBe(false))
+    }
+
+    afterEach(() => {
+      Reflect.deleteProperty(navigator, 'geolocation')
+    })
+
+    it('searches around the current position', async () => {
+      installGeolocation((ok) =>
+        ok({
+          coords: { latitude: 39.78, longitude: -89.65 },
+        } as GeolocationPosition),
+      )
+      await renderReady()
+      await runGeolocate()
+
+      expect(hookApi.error).toBeNull()
+      expect(hookApi.courts).toHaveLength(1)
+    })
+
+    it('requests the position inside the tap, before the map loads (regression)', async () => {
+      // Hold the position so we can observe the state between tap and fix.
+      let deliver!: (pos: GeolocationPosition) => void
+      const getCurrentPosition = vi.fn((ok: typeof deliver) => {
+        deliver = ok
+      })
+      installGeolocation(getCurrentPosition)
+      render(<Harness />)
+      expect(hookApi.mapsReady).toBe(false)
+
+      // Before the fix, the request was queued and only made after the SDK
+      // loaded, outside the user gesture, so browsers denied it.
+      act(() => hookApi.handleGeolocate())
+      expect(getCurrentPosition).toHaveBeenCalledTimes(1)
+
+      // The map still loads, and the held position is searched once it has.
+      await waitFor(() => expect(hookApi.mapsReady).toBe(true))
+      act(() =>
+        deliver({
+          coords: { latitude: 39.78, longitude: -89.65 },
+        } as GeolocationPosition),
+      )
+      await waitFor(() => expect(hookApi.loading).toBe(false))
+      expect(hookApi.error).toBeNull()
+      expect(hookApi.courts).toHaveLength(1)
+    })
+
+    it('searches a position that arrives before the map finishes loading', async () => {
+      // Resolves synchronously, i.e. before the lazy SDK load completes.
+      installGeolocation((ok) =>
+        ok({
+          coords: { latitude: 39.78, longitude: -89.65 },
+        } as GeolocationPosition),
+      )
+      render(<Harness />)
+      act(() => hookApi.handleGeolocate())
+      await waitFor(() => expect(hookApi.loading).toBe(false))
+
+      expect(hookApi.mapsReady).toBe(true)
+      expect(hookApi.error).toBeNull()
+      expect(hookApi.courts).toHaveLength(1)
+    })
+
+    it.each([
+      [1, /location access is blocked/i],
+      [2, /couldn't determine your location/i],
+      [3, /took too long/i],
+    ] as const)(
+      'maps error code %i to its own message (regression)',
+      async (code, message) => {
+        // Before the fix, every code showed "Location access denied", so a
+        // user who had allowed access was told they had denied it.
+        installGeolocation((_ok, fail) => fail(positionError(code)))
+        await renderReady()
+        await runGeolocate()
+
+        expect(hookApi.error).toMatch(message)
+      },
+    )
+
+    it('reports an unsupported browser instead of hanging', async () => {
+      await renderReady()
+      await runGeolocate()
+
+      expect(hookApi.error).toMatch(/can't share your location/i)
+    })
+  })
 })
