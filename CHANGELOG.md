@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.3](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.8.2...tickle-my-pickle-app-v1.8.3) (2026-09-26)
+
+
+### Bug Fixes
+
+* request "Near me" location inside the tap and report each failure accurately ([#116](https://github.com/punchjay/tickle-my-pickle/issues/116)) ([e6a2c50](https://github.com/punchjay/tickle-my-pickle/commit/e6a2c50db1ece9402a128310029ac5b4d111f13f))
+
 ## [1.8.2](https://github.com/punchjay/tickle-my-pickle/compare/tickle-my-pickle-app-v1.8.1...tickle-my-pickle-app-v1.8.2) (2026-09-26)
 
 
