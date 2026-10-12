@@ -3,6 +3,7 @@ import CourtList from '../components/CourtList'
 import Footer from '../components/Footer'
 import { usePickleballMap } from '../hooks/usePickleballMap'
 import { useFavorites } from '../hooks/useFavorites'
+import { useKeyboardInset } from '../hooks/useKeyboardInset'
 import { app } from '../appData'
 import {
   AppWrapper,
@@ -34,11 +35,15 @@ const FinderPage = () => {
     handleCourtSelect,
   } = usePickleballMap()
   const { favorites, isFavorite, toggleFavorite } = useFavorites()
+  const keyboardInset = useKeyboardInset()
 
   return (
     <AppWrapper $mapVisible={courts.length > 0}>
       <MapDiv ref={mapDivRef} $visible={mapShown} />
-      <OverlayTop $mapVisible={courts.length > 0}>
+      <OverlayTop
+        $mapVisible={courts.length > 0}
+        $keyboardInset={keyboardInset}
+      >
         {courts.length === 0 ? (
           <HeaderCard>
             <Wordmark>{app.wordmark}</Wordmark>
@@ -51,6 +56,7 @@ const FinderPage = () => {
           onSearch={handleSearch}
           onGeolocate={handleGeolocate}
           onActivate={activateMaps}
+          autoFocus={courts.length === 0}
           loading={loading}
           disabled={!hasApiKey || loadFailed}
           initializing={activated && !mapsReady && !error}

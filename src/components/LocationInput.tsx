@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { search } from '../appData'
 import { Spinner } from './Spinner.styles'
 import {
@@ -86,6 +86,10 @@ interface Props {
   // Fired the first time the user engages the pill (focus or click), so the
   // page can lazily start loading the Maps SDK only on intent.
   onActivate?: () => void
+  // Put the cursor in the field on mount, on devices with a fine pointer
+  // (mouse/trackpad) only: mobile browsers won't raise the keyboard for a
+  // focus the user didn't trigger, so there it would just be a stray caret.
+  autoFocus?: boolean
   loading: boolean
   disabled: boolean
   // Maps SDK still loading — spin the icon to signal "not yet".
@@ -96,12 +100,28 @@ const LocationInput = ({
   onSearch,
   onGeolocate,
   onActivate,
+  autoFocus = false,
   loading,
   disabled,
   initializing = false,
 }: Props) => {
   const [query, setQuery] = useState('')
   const busy = loading || initializing
+  const inputRef = useRef<HTMLInputElement>(null)
+  // Set around the autofocus so its focus event doesn't count as engagement:
+  // the Maps SDK should still wait for a real click, tap, or keystroke.
+  const autoFocusing = useRef(false)
+
+  useEffect(() => {
+    if (!autoFocus || !window.matchMedia?.('(pointer: fine)').matches) return
+    autoFocusing.current = true
+    inputRef.current?.focus()
+    autoFocusing.current = false
+  }, [autoFocus])
+
+  const handleFocusCapture = () => {
+    if (!autoFocusing.current) onActivate?.()
+  }
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -118,8 +138,13 @@ const LocationInput = ({
 
   return (
     // Pointer-down + focus (capture) cover both a click and a keyboard tab into
-    // any control in the pill; onActivate is idempotent so firing both is fine.
-    <Wrapper onPointerDownCapture={onActivate} onFocusCapture={onActivate}>
+    // any control in the pill; key-down covers typing into the autofocused
+    // field. onActivate is idempotent, so firing more than one is fine.
+    <Wrapper
+      onPointerDownCapture={onActivate}
+      onFocusCapture={handleFocusCapture}
+      onKeyDownCapture={onActivate}
+    >
       <SearchForm onSubmit={handleSubmit}>
         <IconButton
           type="submit"
@@ -129,6 +154,7 @@ const LocationInput = ({
           {busy ? <Spinner /> : <SearchIcon />}
         </IconButton>
         <SearchInput
+          ref={inputRef}
           type="text"
           placeholder={search.placeholder}
           value={query}

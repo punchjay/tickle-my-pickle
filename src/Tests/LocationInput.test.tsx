@@ -141,4 +141,81 @@ describe('LocationInput', () => {
     fireEvent.submit(input.closest('form')!)
     expect(onSearch).not.toHaveBeenCalled()
   })
+
+  describe('autoFocus', () => {
+    const mockPointer = (fine: boolean) => {
+      vi.stubGlobal(
+        'matchMedia',
+        vi.fn((query: string) => ({
+          matches: query === '(pointer: fine)' ? fine : false,
+          media: query,
+        })),
+      )
+    }
+
+    afterEach(() => vi.unstubAllGlobals())
+
+    it('focuses the input on a fine-pointer device without activating Maps', () => {
+      mockPointer(true)
+      const onActivate = vi.fn()
+      render(
+        <LocationInput
+          onSearch={() => {}}
+          onGeolocate={() => {}}
+          onActivate={onActivate}
+          autoFocus
+          loading={false}
+          disabled={false}
+        />,
+      )
+      expect(screen.getByPlaceholderText(PLACEHOLDER)).toHaveFocus()
+      expect(onActivate).not.toHaveBeenCalled()
+    })
+
+    it('activates Maps once the user types into the autofocused input', () => {
+      mockPointer(true)
+      const onActivate = vi.fn()
+      render(
+        <LocationInput
+          onSearch={() => {}}
+          onGeolocate={() => {}}
+          onActivate={onActivate}
+          autoFocus
+          loading={false}
+          disabled={false}
+        />,
+      )
+      fireEvent.keyDown(screen.getByPlaceholderText(PLACEHOLDER), { key: 'S' })
+      expect(onActivate).toHaveBeenCalled()
+    })
+
+    it('leaves focus alone on a touch device', () => {
+      mockPointer(false)
+      render(
+        <LocationInput
+          onSearch={() => {}}
+          onGeolocate={() => {}}
+          autoFocus
+          loading={false}
+          disabled={false}
+        />,
+      )
+      expect(screen.getByPlaceholderText(PLACEHOLDER)).not.toHaveFocus()
+    })
+
+    it('still activates Maps when the user focuses the input themselves', () => {
+      const onActivate = vi.fn()
+      render(
+        <LocationInput
+          onSearch={() => {}}
+          onGeolocate={() => {}}
+          onActivate={onActivate}
+          loading={false}
+          disabled={false}
+        />,
+      )
+      fireEvent.focus(screen.getByPlaceholderText(PLACEHOLDER))
+      expect(onActivate).toHaveBeenCalled()
+    })
+  })
 })

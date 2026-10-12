@@ -100,6 +100,7 @@ src/
   hooks/
     usePickleballMap.ts      # map init, geocoding, Places search, marker state
     useFavorites.ts          # star/unstar courts, persisted to localStorage
+    useKeyboardInset.ts      # on-screen keyboard height (visualViewport), for the docked search pill
   components/
     LocationInput.tsx        # search pill: free-text location input + "Near me" geolocation
     LocationInput.styles.ts  # styled-components for LocationInput
@@ -117,6 +118,7 @@ src/
     CourtList.test.tsx       # behavior tests (count, selection, rating, open/closed)
     usePickleballMap.test.tsx # hook tests against a faked google.maps global
     useFavorites.test.tsx     # favorites hook: add/remove/persist/rehydrate (renderHook)
+    useKeyboardInset.test.tsx # keyboard-inset hook against a faked visualViewport
     appData.test.ts          # courtList.heading(count) singular/plural/zero
     amenities.test.ts        # inferAmenities heuristic: tags + confidence from name/types
     Footer.test.tsx          # wordmark/year, mailto + GitHub links
@@ -149,6 +151,8 @@ All component styles use **styled-components** (no CSS modules, no utility class
 
 **Each component/page keeps its styled-components in a sibling `*.styles.ts`** (`LocationInput.styles.ts`, `CourtList.styles.ts`, `ErrorBoundary.styles.ts`, `pages/FinderPage.styles.ts`, `pages/NotFoundPage.styles.ts`). The component file imports them by name. Prefer a token over a raw hex; a couple of genuine one-offs remain inline (the search pill's white background and placeholder color).
 
+**Pre-search layout differs by input type.** On touch devices (`(hover: none) and (pointer: coarse)`) the search pill docks at the bottom like a chat composer, riding just above the on-screen keyboard via `useKeyboardInset`, with the header card centered in the space above (`OverlayTop`'s `$keyboardInset`). Desktop keeps the centered hero and autofocuses the field instead. Mobile browsers won't raise the keyboard for a focus the user didn't trigger, so touch devices don't autofocus.
+
 **Text inputs must use `font-size: 1rem` (≥16px) or larger.** iOS Safari auto-zooms (and re-centers the viewport on) any focused form control whose font is under 16px — on the finder that zoom shoved the header card off the top of the screen when the keyboard opened. The base rem is 16px, so `1rem` is the floor; don't drop a focusable input below it. `SearchInput` in `LocationInput.styles.ts` carries an inline comment to this effect.
 
 ## TypeScript
@@ -159,13 +163,13 @@ Strict mode with `noUnusedLocals`, `noUnusedParameters`, and `erasableSyntaxOnly
 
 ## Google Maps
 
-Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`). `setOptions` is called **once at module load** (not in the init effect) — StrictMode re-runs effects in dev and a second `setOptions` call warns. The SDK is **loaded lazily, not at startup**: the init effect (which `importLibrary`s `maps`, `places`, `geocoding`, `marker` and builds the map) is gated on an `activated` flag that the hook flips only when the user first engages the search pill (`activateMaps`, wired to the pill's focus/click via `onActivate`). This keeps the map from churning under the backdrop on first paint. A search or "Near me" fired before the SDK finishes loading is stashed in `pendingRef` and replayed by an effect once `mapsReady` turns true; a load failure sets a terminal `loadFailed` flag that re-disables the input. Court search uses the **new Places API** `google.maps.places.Place.searchByText` (text query "pickleball court" with a `locationBias`). Map pins use **`AdvancedMarkerElement`** (the map needs a `mapId` — `VITE_GOOGLE_MAPS_MAP_ID` if set, else `DEMO_MAP_ID`) with numbered `PinElement` glyphs; use the **current**, non-deprecated API: `PinElement({ glyphText })`, pass the `PinElement` directly as `content` (not `pin.element`), and listen via `addEventListener('gmp-click', …)` (not `addListener('click', …)`). Pins are built by the `makePin(index, selected)` helper; an effect re-skins them on selection change so the selected court's pin renders dark (`midnight`) at a larger scale with a raised `zIndex`. Google `Place` results are mapped into the local `Court` interface in the hook, so the rest of the app never touches the SDK shape.
+Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`). `setOptions` is called **once at module load** (not in the init effect) — StrictMode re-runs effects in dev and a second `setOptions` call warns. The SDK is **loaded lazily, not at startup**: the init effect (which `importLibrary`s `maps`, `places`, `geocoding`, `marker` and builds the map) is gated on an `activated` flag that the hook flips only when the user first engages the search pill (`activateMaps`, wired to the pill's focus/click/keystroke via `onActivate`). On desktop the pill autofocuses on load (`autoFocus`, fine-pointer devices only); that programmatic focus deliberately does **not** call `onActivate`, so the SDK still waits for a real click, tap, or keystroke. This keeps the map from churning under the backdrop on first paint. A search or "Near me" fired before the SDK finishes loading is stashed in `pendingRef` and replayed by an effect once `mapsReady` turns true; a load failure sets a terminal `loadFailed` flag that re-disables the input. Court search uses the **new Places API** `google.maps.places.Place.searchByText` (text query "pickleball court" with a `locationBias`). Map pins use **`AdvancedMarkerElement`** (the map needs a `mapId` — `VITE_GOOGLE_MAPS_MAP_ID` if set, else `DEMO_MAP_ID`) with numbered `PinElement` glyphs; use the **current**, non-deprecated API: `PinElement({ glyphText })`, pass the `PinElement` directly as `content` (not `pin.element`), and listen via `addEventListener('gmp-click', …)` (not `addListener('click', …)`). Pins are built by the `makePin(index, selected)` helper; an effect re-skins them on selection change so the selected court's pin renders dark (`midnight`) at a larger scale with a raised `zIndex`. Google `Place` results are mapped into the local `Court` interface in the hook, so the rest of the app never touches the SDK shape.
 
 **Map theming:** because the map uses a `mapId`, the legacy inline `styles: [...]` JSON option is ignored — color styling must be **Cloud-based**, attached to the Map ID. The retro style lives in `docs/map-style.json` (theme-derived: ivory land, court-blue water, warm roads, POI/transit hidden); import it in the console and point `VITE_GOOGLE_MAPS_MAP_ID` at the styled Map ID.
 
 ## Testing
 
-Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Fifteen test files. The suite is **snapshot-free** — tests assert behavior and structure directly (queries, element types, `fireEvent` interactions), not serialized DOM, so there is no `__snapshots__/` to maintain or review.
+Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Sixteen test files. The suite is **snapshot-free** — tests assert behavior and structure directly (queries, element types, `fireEvent` interactions), not serialized DOM, so there is no `__snapshots__/` to maintain or review.
 
 - **Routing** (`App.test.tsx`) — renders `<App />` inside a `MemoryRouter` and asserts the finder renders at `/` (header title/tagline + search input) and the 404 page renders at an unknown route (awaited with `findByRole` since `NotFoundPage` is lazy).
 - **Copy** (`appData.test.ts`) — unit-tests the only logic in `appData.ts`, `courtList.heading(count)` (singular/plural/zero). The other entries are constant strings, covered indirectly by the component/routing tests.

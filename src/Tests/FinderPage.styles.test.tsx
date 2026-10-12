@@ -36,6 +36,13 @@ describe('FinderPage.styles', () => {
     expect(container.firstChild?.nodeName).toBe('DIV')
   })
 
+  it('OverlayTop docks above the on-screen keyboard before the map loads', () => {
+    const { container } = render(
+      <OverlayTop $mapVisible={false} $keyboardInset={300} />,
+    )
+    expect(container.firstChild?.nodeName).toBe('DIV')
+  })
+
   it('OverlayTop slides to the top once the map is visible', () => {
     const { container } = render(<OverlayTop $mapVisible={true} />)
     expect(container.firstChild?.nodeName).toBe('DIV')

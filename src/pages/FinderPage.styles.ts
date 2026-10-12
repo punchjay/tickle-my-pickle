@@ -32,7 +32,19 @@ export const MapDiv = styled.div<{ $visible: boolean }>`
   transition: opacity 0.4s ease;
 `
 
-export const OverlayTop = styled.div<{ $mapVisible: boolean }>`
+// Touch devices (no hover, coarse pointer): before a search, the search pill
+// docks at the bottom like a chat composer, riding just above the on-screen
+// keyboard, with the header card centered in the space above it. Desktop
+// keeps the centered hero.
+const touchDocked = '(hover: none) and (pointer: coarse)'
+// Clears the footer pill (16px inset + ~32px tall) with a 12px gap.
+const dockedBottomRest = 60
+const dockedKeyboardGap = 12
+
+export const OverlayTop = styled.div<{
+  $mapVisible: boolean
+  $keyboardInset?: number
+}>`
   position: absolute;
   left: 50%;
   /* Sits just above center before a search, then slides to the top once the
@@ -52,8 +64,28 @@ export const OverlayTop = styled.div<{ $mapVisible: boolean }>`
   gap: 8px;
   width: min(400px, calc(100vw - 32px));
 
+  ${({ $mapVisible, $keyboardInset = 0 }) =>
+    !$mapVisible &&
+    `
+    @media ${touchDocked} {
+      top: 0;
+      bottom: ${$keyboardInset > 0 ? $keyboardInset + dockedKeyboardGap : dockedBottomRest}px;
+      transform: translateX(-50%);
+      justify-content: flex-end;
+      transition: bottom 0.25s ease;
+      /* Leave room for the status bar / notch above the card. */
+      padding-top: max(16px, env(safe-area-inset-top));
+
+      /* Auto margins center the card in whatever space the pill leaves. */
+      & > header {
+        margin: auto 0;
+      }
+    }
+  `}
+
   @media (prefers-reduced-motion: reduce) {
     animation: none;
+    transition: none;
   }
 `
 
