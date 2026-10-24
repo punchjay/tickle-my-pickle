@@ -2,68 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
-
-```bash
-npm run dev        # dev server (Vite, localhost:5173)
-npm run build      # type-check + production build → dist/
-npm run typecheck  # tsc over src/ and src/Tests/ (no emit)
-npm run lint       # ESLint on src/
-npm run format     # Prettier on src/
-npm run preview    # preview production build locally (localhost:4173)
-npm test           # run all tests once (Vitest)
-npm run test:watch # watch mode
-npm run test:coverage # tests + v8 coverage report → coverage/ (HTML at coverage/index.html)
-```
-
-To run a single test file:
-
-```bash
-npx vitest run src/Tests/MyComponent.test.tsx
-```
-
-## Stack
-
-React 19 + TypeScript 6 + Vite 8 + styled-components v6 + React Router v7. Entry point is `src/main.tsx` (wraps `<BrowserRouter>`) → `src/App.tsx` (route table) → `src/pages/*`.
-
 ## What this app does
 
 Pickleball court finder. User enters a free-text location (city, ZIP, or neighborhood) or uses browser geolocation; the app geocodes the location and runs a Google Maps Places text search ("pickleball court", ~10-mile location bias), drops numbered markers on the map, and shows a scrollable sidebar of results with name, address, rating, open/closed status, and a "Directions" link (opens Google Maps turn-by-turn in a new tab). Selecting a court — by clicking its card or its pin — highlights the card, scrolls it into view, pans the map, and emphasizes that pin. Each card has a star to **save** the court; the sidebar has **Nearby** / **Saved** tabs, and favorites persist across sessions in `localStorage` (`useFavorites`). Note: the Saved tab lives inside the results sidebar, so it's reachable after a search; a pre-search favorites entry point is a documented follow-up. Court cards also show inferred **amenity badges** (indoor/outdoor/lighted/free) — heuristically derived from the listing name and Place `types` (`amenities.ts`), since the Places API carries no structured amenity signal; only high-confidence guesses show by default. See `docs/amenities-tagging-plan.md`.
 
-## Feature backlog / TODO
+## Feature backlog
 
-Candidate work, not yet scheduled. Detailed designs live in `docs/` where noted.
-
-- **`displayedCourts` refactor → filtering & sorting** — central source-of-truth
-  array for both sidebar and map markers; unlocks amenity filters, sort-by-rating,
-  distance sort, and an open-now filter in one stroke. Gating dependency for the
-  next two. See `docs/amenities-tagging-plan.md` (Phase 2).
-- **Distance display & sort** — haversine from search center using
-  `Court.location`; show miles on cards. No new API calls.
-- **Pre-search favorites entry point** — Saved courts are only reachable after a
-  search today; add a Saved entry point on the pre-search canvas.
-- **Shareable search URLs** — encode the location query (`/?q=Austin`) so searches
-  are bookmarkable/shareable.
-- **Next.js migration (scoped, not committed)** — the app is a pure client-side
-  SPA, so this is mostly a framework/tooling swap unless server features are
-  wanted. Shape if pursued:
-  - Routing: `App.tsx`/`main.tsx`/`BrowserRouter` → file-based `app/page.tsx`
-    (FinderPage), `app/not-found.tsx`, `app/layout.tsx`; `react-router-dom` `Link`
-    → `next/link`; `basename` → `basePath`. Next's static export emits its own
-    `404.html`, so the `public/404.html` + `index.html` SPA shim is deleted.
-  - styled-components SSR: add the registry pattern (`useServerInsertedHTML` + SWC
-    `styledComponents` compiler flag); move `GlobalStyle` into `layout.tsx`. The
-    `--pf-*` CSS-vars approach (no ThemeProvider) eases this.
-  - `'use client'` on the client modules (map hook, favorites, styled-components);
-    guard `useFavorites`' `localStorage` initializer with `typeof window`.
-  - Env: `VITE_*` → `NEXT_PUBLIC_*` (two `import.meta.env` reads in
-    `usePickleballMap.ts` → `process.env.*`); update `.env.example` + `deploy.yml`.
-  - Tooling: move Vitest config out of `vite.config.ts` into `vitest.config.ts`;
-    rewrite/drop the `MemoryRouter` routing tests (`App.test.tsx`,
-    `NotFoundPage.styles.test.tsx`); the other 13 test files are unaffected.
-  - Hosting fork: static export keeps GitHub Pages but gives no API
-    routes/SSR/image-opt. Server features (hide the Maps key behind a route,
-    SSR SEO/metadata, future backend) require moving to a Node host (e.g. Vercel).
+Candidate work, not yet scheduled, lives in `docs/backlog.md` — read it before planning new features.
 
 ## Environment
 
@@ -78,56 +23,7 @@ The Maps key lives in GCP project **`project-6f338a57-964a-40ff-b35`** (project 
 - **Daily quota caps — the hard ceiling.** Each used API is capped per day; past it, requests fail with `OVER_QUERY_LIMIT` instead of billing (resets midnight Pacific). Currently **1,000/day** on each of: `maps-backend.googleapis.com/billable_default` (Map loads), `geocoding-backend.googleapis.com/billable_default` (v3 geocoding), `places.googleapis.com/SearchTextRequest`. Adjust: `gcloud alpha services quota update --service=<svc> --consumer=projects/project-6f338a57-964a-40ff-b35 --metric=<metric> --unit="1/d/{project}" --value=<n> --force` (needs the `alpha` component).
 - **Budget alert — early warning email.** A $1 budget named **"Maps API tripwire ($1)"** (`gcloud billing budgets`, requires `billingbudgets.googleapis.com` enabled) emails the billing admins at 50/90/100% of actual spend + forecasted 100%. Since normal usage sits at $0 in the free tier, the 50% ($0.50) alert is effectively a "you've started paying" tripwire. It only warns; it does not stop usage (that's what the quota caps are for).
 
-## Key files
-
-```
-public/
-  404.html                   # GitHub Pages SPA deep-link shim (redirects to index.html)
-src/
-  App.tsx                    # route table (<Routes>): / → FinderPage, * → NotFoundPage
-  appData.ts                 # centralized UI copy (single source of truth for user-facing strings)
-  amenities.ts               # heuristic amenity tagging (indoor/outdoor/lighted/free) w/ confidence, from name + Place types
-  types.ts                   # Court view-model (decoupled from google.maps types)
-  theme.ts                   # typed design tokens (palette/semantic/fonts/radii/shadows) — source of truth
-  GlobalStyle.ts             # createGlobalStyle: emits --pf-* CSS vars on :root + base type
-  index.css                  # global reset only (box-sizing, html/body height)
-  pages/
-    backdrop.styles.ts       # shared striped-backdrop + fade-in keyframes (FinderPage + NotFoundPage)
-    FinderPage.tsx           # the finder: composes map + overlay UI from the hook
-    FinderPage.styles.ts     # styled-components for FinderPage
-    NotFoundPage.tsx         # 404 page (themed, links back home)
-    NotFoundPage.styles.ts   # styled-components for NotFoundPage
-  hooks/
-    usePickleballMap.ts      # map init, geocoding, Places search, marker state
-    useFavorites.ts          # star/unstar courts, persisted to localStorage
-  components/
-    LocationInput.tsx        # search pill: free-text location input + "Near me" geolocation
-    LocationInput.styles.ts  # styled-components for LocationInput
-    CourtList.tsx            # sidebar list of nearby courts
-    CourtList.styles.ts      # styled-components for CourtList
-    ErrorBoundary.tsx        # top-level fallback (wraps App in main.tsx)
-    ErrorBoundary.styles.ts  # styled-components for ErrorBoundary
-    Spinner.tsx              # RouteFallback: centered loader for the <Suspense> fallback
-    Spinner.styles.ts        # shared Spinner indicator (also used inline by LocationInput) + FullPageCenter
-    Footer.tsx               # credit footer (© year + email + GitHub icon); shown on the pre-search canvas
-    Footer.styles.ts         # styled-components for Footer
-  Tests/
-    App.test.tsx             # routing tests (finder at /, 404 at unknown route) via MemoryRouter
-    LocationInput.test.tsx   # interaction tests
-    CourtList.test.tsx       # behavior tests (count, selection, rating, open/closed)
-    usePickleballMap.test.tsx # hook tests against a faked google.maps global
-    useFavorites.test.tsx     # favorites hook: add/remove/persist/rehydrate (renderHook)
-    appData.test.ts          # courtList.heading(count) singular/plural/zero
-    amenities.test.ts        # inferAmenities heuristic: tags + confidence from name/types
-    Footer.test.tsx          # wordmark/year, mailto + GitHub links
-    FinderPage.styles.test.tsx    # per-styled-component render smoke tests
-    LocationInput.styles.test.tsx # per-styled-component render smoke tests
-    CourtList.styles.test.tsx     # per-styled-component render smoke tests
-    ErrorBoundary.styles.test.tsx # per-styled-component render smoke tests
-    NotFoundPage.styles.test.tsx  # per-styled-component render smoke tests
-    Spinner.styles.test.tsx       # per-styled-component render smoke tests
-    Footer.styles.test.tsx        # per-styled-component render smoke tests
-```
+## Architecture
 
 All map/search logic lives in `usePickleballMap.ts`; `FinderPage.tsx` is a thin
 composition layer. Components and tests depend on the `Court` interface in
@@ -153,8 +49,6 @@ All component styles use **styled-components** (no CSS modules, no utility class
 
 ## TypeScript
 
-Strict mode with `noUnusedLocals`, `noUnusedParameters`, and `erasableSyntaxOnly` enforced. Two tsconfig files: `tsconfig.app.json` covers `src/`, `tsconfig.node.json` covers `vite.config.ts`. Both include `"google.maps"` in the `types` array so the `google.maps.*` global namespace is available without explicit imports.
-
 **`typescript` is held at 6.x on purpose — do not bump it to 7.** `typescript-eslint` 8.x declares a peer of `typescript ">=4.8.4 <6.1.0"`, so a major bump makes `npm ci` fail with `ERESOLVE` (this is what sank PR #108). The pin is `~6.0.2` in `package.json`. Unblocking it means waiting for `typescript-eslint` to widen the peer range — check `node_modules/@typescript-eslint/eslint-plugin/package.json` → `peerDependencies.typescript` after a minor bump — then raise `typescript` and drop this note. Don't work around it with `--legacy-peer-deps` or `--force`; that installs a combination the linter isn't tested against.
 
 ## Google Maps
@@ -167,13 +61,7 @@ Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`)
 
 Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Fifteen test files. The suite is **snapshot-free** — tests assert behavior and structure directly (queries, element types, `fireEvent` interactions), not serialized DOM, so there is no `__snapshots__/` to maintain or review.
 
-- **Routing** (`App.test.tsx`) — renders `<App />` inside a `MemoryRouter` and asserts the finder renders at `/` (header title/tagline + search input) and the 404 page renders at an unknown route (awaited with `findByRole` since `NotFoundPage` is lazy).
-- **Copy** (`appData.test.ts`) — unit-tests the only logic in `appData.ts`, `courtList.heading(count)` (singular/plural/zero). The other entries are constant strings, covered indirectly by the component/routing tests.
-- **Amenities** (`amenities.test.ts`) — unit-tests the `inferAmenities` heuristic: which tags fire from a listing's name + Place `types`, and the `high`/`low` confidence assigned to each.
-- **Behavior** (`CourtList.test.tsx`) — renders with mock court data and asserts the Nearby/Saved tab counts, `onSelect` on click, scroll-into-view on selection change, conditional rating / open-closed rendering, the directions link, the star toggle (calls `onToggleFavorite`, doesn't select the row, reflects `aria-pressed`), and the Saved tab (lists favorites, empty state).
 - **Interaction** (`LocationInput.test.tsx`) — the search is a free-text pill (no ZIP/numeric gate); interaction tests use `fireEvent` (not `userEvent` — not installed) to verify submit (via the magnifying-glass submit button), the "Near me" geolocation action, and the disabled + loading states. The trim/guard tests dispatch `fireEvent.submit` on the form directly.
-- **Styled-components smoke** (`FinderPage.styles.test.tsx`, `LocationInput.styles.test.tsx`, `CourtList.styles.test.tsx`, `ErrorBoundary.styles.test.tsx`, `NotFoundPage.styles.test.tsx`, `Spinner.styles.test.tsx`, `Footer.styles.test.tsx`) — one per `*.styles.ts` file; each renders every export and asserts it mounts as the expected element type (and, where a child is passed, its text). Conditional styled-components are rendered in both prop states; `NotFoundPage`'s `HomeLink` (a `styled(Link)`) is wrapped in a `MemoryRouter`.
-- **Footer** (`Footer.test.tsx`) — query-based: asserts the wordmark + current year, the `mailto:` email link, and the GitHub link (new tab, `rel="noopener noreferrer"`).
 - **Hook** (`usePickleballMap.test.tsx`) — drives the hook through a `Harness` component against a faked `google.maps` global (the fake `AdvancedMarkerElement` exposes `addEventListener`, matching the real HTMLElement). Captures the hook return in an effect (not during render) to satisfy `react-hooks` lint rules.
 
 `google.maps` types are globally available in tests via the `"google.maps"` entry in `src/Tests/tsconfig.json`. Mock court objects are plain `Court[]` literals (the `Court` interface in `types.ts` is a small view-model, so no casting is needed). `Element.prototype.scrollIntoView` is mocked with `vi.fn()` in `CourtList.test.tsx` since jsdom doesn't implement it. `src/setupTests.ts` registers `@testing-library/jest-dom` and installs an in-memory `localStorage` (Node 22+ ships a disabled native `localStorage` global that shadows jsdom's and throws).
@@ -181,8 +69,6 @@ Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Fiftee
 ## CI
 
 `.github/workflows/ci.yml` (named **CI**) runs on every pull request and push to `main`: `lint`, `typecheck`, `test`, `build`. `main` is **branch-protected** — the `verify` check must pass before merge (`enforce_admins: false`, so admins can still bypass).
-
-`.github/workflows/deploy.yml` deploys to GitHub Pages **only after CI succeeds** — it triggers via `workflow_run` on the CI workflow completing on `main` and runs only when the conclusion is `success` (plus a manual `workflow_dispatch` escape hatch). It builds with the `VITE_GOOGLE_MAPS_API_KEY` secret and publishes `dist/`.
 
 `.github/workflows/release-please.yml` automates releases: it opens/updates a release PR aggregating Conventional Commits on `main`; merging that PR cuts the tag + GitHub release and bumps `package.json`/`CHANGELOG.md`. Config in `release-please-config.json` + `.release-please-manifest.json`. Release PRs are **auto-merged** — the workflow's `Auto-merge the release PR` step merges the freshly-opened release PR with `gh pr merge --squash --admin`, so a version ships on every feature/fix merge without a manual step. That merge uses a **`RELEASE_PLEASE_PAT`** secret (a fine-grained PAT with Contents + Pull-requests read/write), **not** the default `GITHUB_TOKEN`: GitHub won't trigger new workflow runs from `GITHUB_TOKEN` actions, so a `GITHUB_TOKEN` merge would neither re-run release-please to cut the tag/release nor run CI on the merge commit (which gates the Pages deploy). The `--admin` flag is needed because release-please's own PRs are created by `GITHUB_TOKEN`, so CI does **not** run on them and the required `verify` check never reports. If the `RELEASE_PLEASE_PAT` secret is absent the auto-merge step skips cleanly and you merge the release PR by hand with `gh pr merge <num> --squash --admin`.
 
@@ -193,8 +79,6 @@ There is **no Dependabot** in this repo — dependency updates are done by hand 
 Default model for any Claude API integrations in this project: `claude-opus-4-8`.
 
 ## Code style
-
-Prettier config (`.prettierrc`): single quotes, no semicolons, trailing commas, 80-char print width, 2-space indent.
 
 ESLint uses the modern flat config (`eslint.config.js`) with `typescript-eslint`, `eslint-plugin-react-hooks`, and `eslint-plugin-react-refresh`. The `react-hooks/set-state-in-effect` rule is active — initialize state from a lazy initializer rather than calling `setState` synchronously inside `useEffect`.
 
