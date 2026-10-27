@@ -18,10 +18,7 @@ Optional `VITE_GOOGLE_MAPS_MAP_ID` selects a **Cloud-styled Map ID** for the ret
 
 ### Billing & quota safeguards
 
-The Maps key lives in GCP project **`project-6f338a57-964a-40ff-b35`** (project number `718145742726`), billing account **`01071C-F88769-A0BD5A`**. Maps APIs bill the card automatically past the monthly free tier — Google does **not** warn or stop on its own — so two safeguards are in place (managed via `gcloud`, not in this repo):
-
-- **Daily quota caps — the hard ceiling.** Each used API is capped per day; past it, requests fail with `OVER_QUERY_LIMIT` instead of billing (resets midnight Pacific). Currently **1,000/day** on each of: `maps-backend.googleapis.com/billable_default` (Map loads), `geocoding-backend.googleapis.com/billable_default` (v3 geocoding), `places.googleapis.com/SearchTextRequest`. Adjust: `gcloud alpha services quota update --service=<svc> --consumer=projects/project-6f338a57-964a-40ff-b35 --metric=<metric> --unit="1/d/{project}" --value=<n> --force` (needs the `alpha` component).
-- **Budget alert — early warning email.** A $1 budget named **"Maps API tripwire ($1)"** (`gcloud billing budgets`, requires `billingbudgets.googleapis.com` enabled) emails the billing admins at 50/90/100% of actual spend + forecasted 100%. Since normal usage sits at $0 in the free tier, the 50% ($0.50) alert is effectively a "you've started paying" tripwire. It only warns; it does not stop usage (that's what the quota caps are for).
+Maps APIs bill the card automatically past the free tier, so daily quota caps (1,000/day per API — requests past it fail with `OVER_QUERY_LIMIT`) and a $1 budget alert are in place, managed via `gcloud`, not in this repo. A request failing with `OVER_QUERY_LIMIT` is the cap working, not a bug. GCP project IDs and the commands to adjust caps/budget are in the `maps-billing-safeguards` skill.
 
 ## Architecture
 
@@ -43,7 +40,7 @@ All component styles use **styled-components** (no CSS modules, no utility class
 
 **Theme tokens are CSS custom properties (`--pf-*`).** `theme.ts` is the typed source of truth (palette/semantic/fonts/radii/shadows); `GlobalStyle.ts` (`createGlobalStyle`) emits them on `:root` plus the base typography; styled-components reference them via `var(--pf-*)`. This was chosen over a styled-components `ThemeProvider` so tests need no provider wrapping. `index.css` is reset-only — `GlobalStyle` carries the themed globals. Non-CSS consumers (e.g. the map `PinElement` colors) import the `palette` object from `theme.ts`.
 
-**Each component/page keeps its styled-components in a sibling `*.styles.ts`** (`LocationInput.styles.ts`, `CourtList.styles.ts`, `ErrorBoundary.styles.ts`, `pages/FinderPage.styles.ts`, `pages/NotFoundPage.styles.ts`). The component file imports them by name. Prefer a token over a raw hex; a couple of genuine one-offs remain inline (the search pill's white background and placeholder color).
+**Each component/page keeps its styled-components in a sibling `*.styles.ts`.** The component file imports them by name. Prefer a token over a raw hex; a couple of genuine one-offs remain inline (the search pill's white background and placeholder color).
 
 **Text inputs must use `font-size: 1rem` (≥16px) or larger.** iOS Safari auto-zooms (and re-centers the viewport on) any focused form control whose font is under 16px — on the finder that zoom shoved the header card off the top of the screen when the keyboard opened. The base rem is 16px, so `1rem` is the floor; don't drop a focusable input below it. `SearchInput` in `LocationInput.styles.ts` carries an inline comment to this effect.
 
@@ -59,12 +56,7 @@ Uses `@googlemaps/js-api-loader` functional API (`setOptions` + `importLibrary`)
 
 ## Testing
 
-Tests live in `src/Tests/` and run with Vitest + Testing Library (jsdom). Fifteen test files. The suite is **snapshot-free** — tests assert behavior and structure directly (queries, element types, `fireEvent` interactions), not serialized DOM, so there is no `__snapshots__/` to maintain or review.
-
-- **Interaction** (`LocationInput.test.tsx`) — the search is a free-text pill (no ZIP/numeric gate); interaction tests use `fireEvent` (not `userEvent` — not installed) to verify submit (via the magnifying-glass submit button), the "Near me" geolocation action, and the disabled + loading states. The trim/guard tests dispatch `fireEvent.submit` on the form directly.
-- **Hook** (`usePickleballMap.test.tsx`) — drives the hook through a `Harness` component against a faked `google.maps` global (the fake `AdvancedMarkerElement` exposes `addEventListener`, matching the real HTMLElement). Captures the hook return in an effect (not during render) to satisfy `react-hooks` lint rules.
-
-`google.maps` types are globally available in tests via the `"google.maps"` entry in `src/Tests/tsconfig.json`. Mock court objects are plain `Court[]` literals (the `Court` interface in `types.ts` is a small view-model, so no casting is needed). `Element.prototype.scrollIntoView` is mocked with `vi.fn()` in `CourtList.test.tsx` since jsdom doesn't implement it. `src/setupTests.ts` registers `@testing-library/jest-dom` and installs an in-memory `localStorage` (Node 22+ ships a disabled native `localStorage` global that shadows jsdom's and throws).
+The suite is **snapshot-free** — don't add snapshot tests. Test conventions live in `src/Tests/CLAUDE.md` (loaded when working on tests).
 
 ## CI
 
