@@ -68,7 +68,7 @@ There is **no Dependabot** in this repo — dependency updates are done by hand 
 
 ## Claude API
 
-Default model for any Claude API integrations in this project: `claude-opus-4-8`.
+Default model for any Claude API integrations in this project: `claude-opus-5-5`.
 
 ## Code style
 
